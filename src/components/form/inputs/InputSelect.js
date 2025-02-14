@@ -25,7 +25,7 @@ const InputSelect = forwardRef((props, ref) => {
                     value={value}
                     onChange={(e) => setValue(e.target.value)}
                 >
-                    <option>{props.placeholder}</option>
+                    {props.placeholder && <option>{props.placeholder}</option>}
                     {props.options?.map((option, index) => (
                         <option key={index} value={option.value || option.id}>
                             {option.label || option.name || ''}
