@@ -1,0 +1,16 @@
+.me-page {
+    .me-info {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        .user-profile {
+            width: 100%;
+            background-color: white;
+            max-width: 800px;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+    }
+}

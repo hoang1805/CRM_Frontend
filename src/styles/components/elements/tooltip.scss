@@ -1,0 +1,19 @@
+.tooltip-container {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip-box {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: black;
+    color: white;
+    padding: 5px;
+    border-radius: 5px;
+    font-size: 12px;
+    white-space: nowrap;
+    visibility: visible;
+    opacity: 1;
+}

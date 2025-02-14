@@ -1,0 +1,101 @@
+.panel {
+    background-color: rgb(35, 63, 128);
+    height: 100%;
+    .panel-item {
+        position: relative;
+        &:hover {
+            .actions {
+                display: block;
+            }
+        }
+        .actions {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 70px;
+            background-color: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 8px;
+            text-align: left;
+            margin: 0;
+            width: 220px;
+            color: rgb(55, 65, 81);
+            > .panel-item {
+                padding: .25rem;
+                .item-name {
+                    font-size: .875rem;
+                    line-height: 1.25rem;
+                }
+                &:hover {
+                    color: #2c5099;
+                    background-color: rgb(243, 244, 246);
+                }
+            }
+        }
+    }
+
+    .items-top {
+        > .panel-item {
+            padding: 8px 0px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            &.active {
+                background-color: white;
+                color: rgb(35, 63, 128);
+            }
+            justify-content: center;
+            align-items: center;;
+    
+            .item-name {
+                font-size: .75rem;
+                line-height: 1rem;
+            }
+    
+            .item-icon {
+                font-size: 1.5rem;
+            }
+    
+            &:hover {
+                background-color: rgb(46, 87, 182);
+                color: white;
+                cursor: pointer;
+            }
+        }
+    }
+
+    .items-bottom {
+        > .panel-item {
+            padding: 8px 0px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            &.active {
+                background-color: white;
+                color: rgb(35, 63, 128);
+            }
+            justify-content: center;
+            align-items: center;;
+    
+            .item-name {
+                font-size: .75rem;
+                line-height: 1rem;
+            }
+    
+            .item-icon {
+                font-size: 1.5rem;
+            }
+    
+            &:hover {
+                background-color: rgb(46, 87, 182);
+                color: white;
+                cursor: pointer;
+            }
+        }
+    }
+    
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}

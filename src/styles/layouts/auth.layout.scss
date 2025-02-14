@@ -1,0 +1,36 @@
+.auth-layout {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    .banner {
+        text-align: center;
+        background-color: #025588;
+        font-weight: bold;
+        color: #fff;
+        width: 410px;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        .wrapper {
+            padding: 4px 10px;
+            .image {
+                margin-bottom: 100px;
+            }
+
+            .app-name {
+                font-size: 40px;
+                margin-bottom: 20px;
+            }
+
+            .tagline {
+                font-size: 27px;
+            }
+        }
+    }
+
+    .content {
+        flex: 1;
+    }
+}

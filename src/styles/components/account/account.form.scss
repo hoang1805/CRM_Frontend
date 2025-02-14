@@ -1,0 +1,14 @@
+.account-form {
+    .form-group {
+        padding: 5px 0px;
+        .group-label {
+            width: 200px;
+        }
+        &.input-user {
+            .suggestions {
+                width: 330px;
+                max-width: 330px;
+            }
+        }
+    }
+}

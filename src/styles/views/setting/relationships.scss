@@ -1,0 +1,16 @@
+.relationships-page {
+    .relationships {
+        .relationship-table {
+            table {
+                td {
+                    word-wrap: break-word;
+                    white-space: normal;
+                    
+                    &:last-child {
+                        width: 110px;
+                    }
+                }
+            }
+        }
+    }
+}

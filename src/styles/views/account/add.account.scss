@@ -1,0 +1,14 @@
+.add-account-page {
+    .account-content {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        .title {
+            padding-bottom: 30px;
+        }
+
+        .account-form {
+            width: 700px;
+        }
+    }
+}

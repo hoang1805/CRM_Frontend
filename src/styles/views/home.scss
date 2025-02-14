@@ -1,0 +1,77 @@
+.home-page {
+    .home-page-content {
+        .sidebar{
+            .date {
+                color: gray;
+                font-size: 14px;
+                line-height: 24px;
+            }
+            .hello {
+                font-weight: 500;
+                font-size: 24px;
+            }
+        }
+        .section {
+            margin-top: 50px;
+            .title {
+                font-weight: 500;
+                font-size: 20px;
+                margin-bottom: 20px;
+            }
+        }
+
+        .report {
+            .content {
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr 1fr;
+                gap: 16px;
+                .number-customer {
+                    background-color: #3b82f6;
+                }
+                .complete-task {
+                    background-color: #10b981;
+                }
+                .inprogress-task {
+                    background-color: #f59e0b;
+                }
+                .overdue-task {
+                    background-color: #ef4444;
+                }
+            }
+        }
+
+        .quick-access {
+            .content {
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr 1fr;
+                gap: 16px;
+
+                button {
+                    padding: 12px 20px;
+                    border-radius: 8px;
+                    color: #ffffff;
+                    border: none;
+                    cursor: pointer;
+                    font-size: 1rem;
+                    transition: transform 0.2s;
+                    &:hover {
+                        transform: scale(1.05);
+                    }
+                }
+
+                .create-task {
+                    background-color: #22c55e;
+                }
+                .customer-list {
+                    background-color: #2563eb;
+                }
+                .import-customer {
+                    background-color: #14b8a6;
+                }
+                .create-customer {
+                    background-color: #eab308;
+                }
+            }
+        }
+    }
+}

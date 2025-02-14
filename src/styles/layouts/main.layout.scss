@@ -1,0 +1,28 @@
+.main-layout {
+    .page-panel {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 70px;
+        height: 100%;
+    }
+
+    .main-page {
+        margin-left: 70px;
+        background-color: rgb(243, 244, 246);
+        min-height: 100vh;
+        display: flex;
+        > * {
+            flex: 1;
+        }
+
+        .main-content-wp {
+            padding: 20px 50px 50px;
+        }
+    }
+
+    .page-header {
+        border-bottom: 1px solid #ccc;
+        padding-left: 10px;
+    }
+}

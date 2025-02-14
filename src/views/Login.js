@@ -1,0 +1,63 @@
+import React, { useContext, useEffect, useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import loading from '../utils/Loading';
+import error_popup from '../utils/popup/ErrorPopup';
+import api from '../utils/Axios';
+import popup from '../utils/popup/Popup';
+import '../styles/views/login.scss';
+import AuthContext from '../context/AuthContext';
+import flash from '../utils/Flash';
+
+const Login = () => {
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const auth_context = useContext(AuthContext);
+    const navigate = useNavigate(); // Hook để chuyển hướng
+
+    // Xử lý submit form
+    const handleSubmit = async (e) => {
+        e.preventDefault(); // Ngăn form reload trang
+        loading.show();
+
+        // Kiểm tra validation
+        if (!username || !password) {
+            error_popup.show("Username or password is empty. Please try again.");
+            loading.hide();
+            return;
+        }
+
+        // Gửi API đăng nhập (giả lập)
+        try {
+            const response = await api.post('/api/login', {username, password});
+            const user = response.data.user;
+            auth_context.login(user);
+            flash.success('Login successful');
+            navigate('/home');
+        } catch (error) {
+            error_popup.show(error.response?.data?.message || error.message || 'Có lỗi xảy ra');
+        } finally {
+            loading.hide();
+        }
+    };
+
+
+    return (
+        <div className="login-page">
+            <h1 className="title">Đăng nhập</h1>
+            <div className="form-group">
+                <label htmlFor="username">Tên đăng nhập</label>
+                <input id="username" name="username" type="text" placeholder="Nhập tài khoản" value={username} onChange={(e) => setUsername(e.target.value)} />
+            </div>
+            <div className="form-group">
+                <label htmlFor="password">Mật khẩu</label>
+                <input id="password" name="password" type="password" placeholder="Nhập mật khẩu" value={password} onChange={(e) => setPassword(e.target.value)} />
+            </div>
+            <div className="forgot-password">
+                <Link to='/forget.password'>Quên mật khẩu</Link>
+            </div>
+            <button className="login-button" onClick={handleSubmit}>Đăng nhập</button>
+        </div>
+    );
+};
+
+export default Login;

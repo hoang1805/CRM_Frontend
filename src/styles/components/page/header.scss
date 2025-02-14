@@ -1,0 +1,67 @@
+.page-header {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 50px !important;
+    background-color: white;
+    &::after {
+        content: "";
+        display: table;
+        clear: both;
+    }
+    .header-icon {
+        background: linear-gradient(218.66deg, #2c5099 -6.25%, #233f80 107.64%);
+        border-radius: .5rem;
+        font-size: 1.125rem;
+        height: 2.75rem;
+        line-height: 1.75rem;
+        width: 2.75rem;
+        color: white;
+        font-weight: 500;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        float: left;
+    }
+
+    .header-content {
+        display: flex;
+        flex-direction: column;
+        float: left;
+        padding-left: 10px;
+        .header-title {
+            padding-top: 0px;
+            font-weight: 600;
+            font-size: 19px;
+            line-height: 1.5rem;
+        }
+    }
+
+    .header-actions {
+        display: flex;
+        float: right;
+        padding-right: 20px;
+        a {
+            color: white;
+            margin-left: 10px;
+            font-weight: 500;
+        }
+
+        .actions {
+            padding-right: 50px;
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+            gap: 20px;
+            > .icon {
+                font-size: 25px;
+            }
+            .action-item {
+                &:hover {
+                    cursor: pointer;
+                }
+
+            }
+        }
+    }
+
+}
