@@ -7,7 +7,7 @@ const InputDate = forwardRef((props, ref) => {
     const [error, setError] = useState('');
 
     useImperativeHandle(ref, () => ({
-        getData: () => ({ key: props.name, value: value }),
+        getData: () => ({ key: props.name, value: value?.getTime() || null }),
         validate,
         resetData:() => {
             setValue(props.value || new Date());
