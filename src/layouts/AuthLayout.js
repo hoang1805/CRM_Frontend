@@ -6,11 +6,11 @@ const AuthLayout = () => {
     return (
         <div className="auth-layout">
             <div className="banner">
-                <div className="wrapper">
+                <div className="wrapper flex flex-col items-center">
                     <img
                         src="/emojj.png"
                         alt="Emojj Banner"
-                        className="image"
+                        className="image size-40"
                     />
                     <div className="app-name">TITANCRM</div>
                     <div className="tagline">
