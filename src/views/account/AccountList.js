@@ -120,7 +120,7 @@ const getColumns = (relationships, sources, navigate, users = []) => {
         },
         {
             title: 'Người giới thiệu',
-            dataIndex: 'reffererId',
+            dataIndex: 'referrerId',
             ellipsis: true,
             width: 150,
             render: (e) => {
@@ -130,7 +130,7 @@ const getColumns = (relationships, sources, navigate, users = []) => {
         },
         {
             title: 'Nguồn',
-            dataIndex: 'reffererId',
+            dataIndex: 'sourceId',
             ellipsis: true,
             width: 150,
             render: (e) => {
@@ -302,7 +302,7 @@ const AccountList = () => {
             page: params?.pagination?.current - 1 || 0,
             ipp: params?.pagination?.pageSize || 10,
             relationship_id: params?.filters?.relationship_id || 0,
-            search: params?.query || '',
+            query: params?.query || '',
         };
     };
 
