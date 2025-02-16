@@ -3,9 +3,12 @@ import loading from '../../utils/Loading';
 import popup from '../../utils/popup/Popup';
 import error_popup from '../../utils/popup/ErrorPopup';
 import api from '../../utils/Axios';
+import { useNavigate } from 'react-router-dom';
+import confirm_popup from '../../utils/popup/ConfirmPopup';
 
 const InlineForm = (props) => {
     const child_refs = useRef({});
+    const navigate = useNavigate();
     let count = 0;
     const collectRefs = (children) => {
         return React.Children.map(children, (child, index) => {
@@ -27,11 +30,11 @@ const InlineForm = (props) => {
     };
 
     const handleCancel = () => {
-        for (const key in child_refs.current) {
-            if (child_refs.current[key] && typeof child_refs.current[key].resetData === "function") {
-                child_refs.current[key].resetData(); // Gọi hàm reset cho từng input
+        confirm_popup.showAlert('Are you sure to cancel this page? The data may not be changed.', (choose) => {
+            if (choose) {
+                navigate(-1);
             }
-        }
+        });
     };
 
     const handleSubmit = async (event) => {
@@ -70,7 +73,7 @@ const InlineForm = (props) => {
             <div className='form-body'>{collectRefs(props.children)}</div> 
             <div className='pt-6 actions flex flex-row gap-6 items-center justify-between'>
                 <button className="form-action form-btn-submit flex-1 btn btn-soft btn-accent" onClick={handleSubmit}>{props.submit || 'Gửi'}</button>
-                {props.cancel && <button className="form-action form-btn-cancel flex-1 btn btn-soft btn-secondary" onClick={handleCancel}>{props.cancel_text || 'Xóa'}</button>}
+                {props.cancel && <button className="form-action form-btn-cancel flex-1 btn btn-soft btn-secondary" onClick={handleCancel}>Thoát</button>}
             </div>
         </div>
     );

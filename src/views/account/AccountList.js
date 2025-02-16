@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Header from '../../components/page/Header';
 import { PiUsersThreeFill } from 'react-icons/pi';
 import MainContent from '../../components/page/MainContent';
-import { render } from 'sass';
 import Arr from '../../utils/Array';
 import Gender from '../../utils/Gender';
 import DateHelpers from '../../utils/Date';
@@ -10,176 +9,195 @@ import drawer from '../../utils/Drawer';
 import AccountForm from '../../components/account/AccountForm';
 import flash from '../../utils/Flash';
 import confirm_popup from '../../utils/popup/ConfirmPopup';
-import loading from '../../utils/Loading';
+import load from '../../utils/Loading';
 import api from '../../utils/Axios';
 import error_popup from '../../utils/popup/ErrorPopup';
 import Client from '../../utils/client.manager';
 import { useNavigate } from 'react-router-dom';
-import PaginatedTable from '../../components/table/PaginatedTable';
+import { createStyles } from 'antd-style';
+import {
+    Button,
+    ConfigProvider,
+    Empty,
+    Input,
+    Table,
+    Tag,
+    Tooltip,
+} from 'antd';
+import {
+    DeleteOutlined,
+    LeftOutlined,
+    RightOutlined,
+    UserOutlined,
+    VerticalAlignBottomOutlined,
+    VerticalAlignTopOutlined,
+} from '@ant-design/icons';
+import loading from '../../utils/Loading';
+const useStyle = createStyles(({ css, token }) => {
+    const { antCls } = token;
 
-const EmptyState = () => {
-    return (
-        <div className="min-h-60 w-full flex items-center justify-center">
-            <div className="flex items-center justify-center flex-col">
-                <span className="icon-[tabler--brand-google-drive] mb-2 size-10"></span>
-                <div className="text-lg font-medium">No data to show.</div>
-            </div>
-        </div>
-    );
-};
+    return {
+        customTable: css`
+            .${antCls || 'ant'}-table {
+                .${antCls || 'ant'}-table-container {
+                    .${antCls || 'ant'}-table-body,
+                        .${antCls || 'ant'}-table-content {
+                        scrollbar-width: thin;
+                        scrollbar-color: #eaeaea transparent;
+                        scrollbar-gutter: stable;
+                    }
+                }
+            }
+        `,
+    };
+});
 
-const LoadingComponent = () => {
-    return (
-        <div className="min-h-60 w-full flex items-center justify-center">
-            <div className="flex items-center justify-center flex-col">
-                <span className="loading loading-spinner loading-lg"></span>
-                <div className="text-lg font-medium">Loading</div>
-            </div>
-        </div>
-    );
+const renderEmpty = (component_name) => {
+    if (component_name === 'Table.filter') {
+        return (
+            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="No data" />
+        );
+    }
 };
 
 const getColumns = (relationships, sources, navigate, users = []) => {
     return [
         {
-            name: 'Tên khách hàng',
+            title: 'Tên khách hàng',
+            dataIndex: 'name',
+            width: 150,
+            fixed: 'left',
+            ellipsis: true,
+        },
+        {
+            title: 'Mã KH',
+            dataIndex: 'code',
+            width: 150,
+            fixed: 'left',
+            ellipsis: true,
+        },
+        {
+            title: 'Số điện thoại',
+            dataIndex: 'phone',
+            width: 150,
+        },
+        {
+            title: 'Giới tính',
+            dataIndex: 'gender',
+            width: 100,
             render: (e) => {
-                return e.name;
+                return Gender.fromContext(e)?.label || 'Khác';
             },
         },
         {
-            name: 'Mã KH',
-            render: (e) => {
-                return e.code;
-            },
+            title: 'Email',
+            dataIndex: 'email',
+            width: 200,
         },
         {
-            name: 'Số điện thoại',
+            title: 'Ngày sinh',
+            dataIndex: 'birthday',
+            width: 150,
             render: (e) => {
-                return e.phone;
+                return e ? DateHelpers.formatDate(e, 'DD/MM/YYYY') : '';
             },
+            ellipsis: true,
         },
         {
-            name: 'Giới tính',
+            title: 'Người phụ trách',
+            width: 150,
+            dataIndex: 'assignedUserId',
+            ellipsis: true,
             render: (e) => {
-                return Gender.fromContext(e.gender)?.label || 'Khác';
-            },
-        },
-        {
-            name: 'Email',
-            render: (e) => {
-                return e.email;
-            },
-        },
-        {
-            name: 'Ngày sinh',
-            render: (e) => {
-                return e.birthday
-                    ? DateHelpers.formatDate(e.birthday, 'DD/MM/YYYY')
-                    : '';
-            },
-        },
-        {
-            name: 'Người phụ trách',
-            render: (e) => {
-                const user = Arr.findById(
-                    users,
-                    e.assigned_user_id || e.assignedUserId
-                );
+                const user = Arr.findById(users, e);
                 return user?.name || 'Không có dữ liệu';
             },
         },
         {
-            name: 'Ngành nghề',
-            render: (e) => {
-                return e.job || '';
-            },
+            title: 'Ngành nghề',
+            dataIndex: 'job',
+            width: 200,
         },
         {
-            name: 'Người giới thiệu',
+            title: 'Người giới thiệu',
+            dataIndex: 'reffererId',
+            ellipsis: true,
+            width: 150,
             render: (e) => {
-                const user = Arr.findById(users, e.referrer_id || e.referrerId);
+                const user = Arr.findById(users, e);
                 return user?.name || 'Không có dữ liệu';
             },
         },
         {
-            name: 'Nguồn khách hàng',
+            title: 'Nguồn',
+            dataIndex: 'reffererId',
+            ellipsis: true,
+            width: 150,
             render: (e) => {
-                const source = Array.findById(
-                    sources,
-                    e.source_id || e.sourceId
-                );
+                const source = Arr.findById(sources, e);
                 return source ? source.name : 'Không có dữ liệu';
             },
         },
         {
-            name: 'Người tạo',
+            title: 'Người tạo',
+            width: 150,
+            dataIndex: 'creatorId',
+            ellipsis: true,
             render: (e) => {
-                const user = Arr.findById(users, e.creator_id || e.creatorId);
+                const user = Arr.findById(users, e);
                 return user?.name || 'Không có dữ liệu';
             },
         },
         {
-            name: 'Ngày tạo',
+            title: 'Mối quan hệ',
+            dataIndex: 'relationshipId',
+            ellipsis: true,
+            width: 150,
             render: (e) => {
-                return e.createdAt
-                    ? DateHelpers.formatDate(e.createdAt, 'DD/MM/YYYY HH:mm')
-                    : '';
+                const relationship = Arr.findById(relationships, e);
+                return relationship ? relationship.name : 'Không có dữ liệu';
             },
         },
         {
-            name: 'Mối quan hệ khách hàng',
+            title: 'Ngày tạo',
+            width: 150,
+            dataIndex: 'createdAt',
+            ellipsis: true,
             render: (e) => {
-                const relationship = Array.findById(
-                    relationships,
-                    e.relationship_id || e.relationshipId
-                );
-                return relationship? relationship.name : 'Không có dữ liệu';
-            }
-        },
-        {
-            name: 'Cập nhật lần cuối',
-            render: (e) => {
-                return e.updatedAt
-                    ? DateHelpers.formatDate(e.updatedAt, 'DD/MM/YYYY HH:mm')
-                    : '';
+                return e ? DateHelpers.formatDate(e, 'DD/MM/YYYY HH:mm') : '';
             },
         },
         {
-            name: 'Thao tác',
+            title: 'Cập nhật lần cuối',
+            dataIndex: 'lastUpdate',
+            ellipsis: true,
+            width: 150,
+            render: (e) => {
+                return e ? DateHelpers.formatDate(e, 'DD/MM/YYYY HH:mm') : '';
+            },
+        },
+        {
+            title: 'Thao tác',
+            key: 'operation',
+            fixed: 'right',
+            width: 100,
             render: (e) => {
                 const acl = e.acl;
+                console.log(e);
                 return (
                     <>
-                        {acl?.edit || acl?.edit == null ? (
-                            <button
-                                className="btn btn-circle btn-text btn-sm"
-                                aria-label="Action button"
-                                onClick={() => {
-                                    drawer.show({
-                                        content: (
-                                            <AccountForm
-                                                url={`/api/account/edit/${e.id}`}
-                                                title="Cập nhật mối quan hệ"
-                                                value={e}
-                                                submit="Cập nhật"
-                                                relationships={relationships}
-                                                callback={() => {
-                                                    flash.success(
-                                                        'Cập nhật thành công!'
-                                                    );
-                                                    navigate(0);
-                                                }}
-                                            />
-                                        ),
-                                    });
-                                }}
-                            >
-                                <span className="icon-[tabler--pencil] size-5"></span>
-                            </button>
-                        ) : (
-                            ''
-                        )}
+                        
+                        <button
+                            className="btn btn-circle btn-text btn-sm"
+                            aria-label="Action button"
+                            disabled={!(acl?.edit || acl?.edit == null)}
+                            onClick={() => {
+                                navigate(`/account/edit/${e.id}`);
+                            }}
+                        >
+                            <span className="icon-[tabler--pencil] size-5"></span>
+                        </button>
+                        
                         {acl?.delete || acl?.delete == null ? (
                             <button
                                 className="btn btn-circle btn-text btn-sm"
@@ -192,7 +210,7 @@ const getColumns = (relationships, sources, navigate, users = []) => {
                                                 const deleteRelationship =
                                                     async () => {
                                                         try {
-                                                            loading.show();
+                                                            load.show();
                                                             const response =
                                                                 await api.delete(
                                                                     `/api/account/delete/${e.id}`
@@ -207,7 +225,7 @@ const getColumns = (relationships, sources, navigate, users = []) => {
                                                             );
                                                             console.error(err);
                                                         } finally {
-                                                            loading.hide();
+                                                            load.hide();
                                                         }
                                                     };
                                                 deleteRelationship();
@@ -229,33 +247,83 @@ const getColumns = (relationships, sources, navigate, users = []) => {
 };
 
 const AccountList = () => {
-    const [relationships, setRelationships] = useState(Client.get('relationships'));
+    const [relationships, setRelationships] = useState(
+        Client.get('relationships')
+    );
     const [sources, setSources] = useState(Client.get('sources'));
     const [users, setUsers] = useState(Client.get('users'));
-    const [page, setPage] = useState(0);
-    const [ipp, setIpp] = useState(10);
-    const [loading, setLoading] = useState(false);
-    const [total, setTotal] = useState(0);
-    const [data, setData] = setData([]);
+
+    const [load, setLoad] = useState(false);
+    const [data, setData] = useState([]);
+
+    const [relationship, setRelationship] = useState(0);
+
+    const [canScrollLeft, setCanScrollLeft] = useState(false);
+    const [canScrollRight, setCanScrollRight] = useState(true);
+    const scrollContainer = useRef(null);
+
+    const { styles } = useStyle();
+
+    const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+
+    // Cuộn danh sách khi nhấn nút
+    const scroll = (direction) => {
+        if (scrollContainer.current) {
+            scrollContainer.current.scrollBy({
+                left: direction * 100,
+                behavior: 'smooth',
+            });
+        }
+    };
+
+    const onSelectChange = (newSelectedRowKeys) => {
+        console.log('selectedRowKeys changed: ', newSelectedRowKeys);
+        setSelectedRowKeys(newSelectedRowKeys);
+    };
+    const rowSelection = {
+        selectedRowKeys,
+        onChange: onSelectChange,
+    };
+    const hasSelected = selectedRowKeys.length > 0;
+
+    const [params, setParams] = useState({
+        pagination: {
+            current: 0 + 1, // current page, page index
+            pageSize: 10, // ipp
+        },
+        filters: {
+            relationship_id: 0,
+        },
+    });
     const navigate = useNavigate();
 
-    const fetchData = async () => {
-        setLoading(true);
-        try {
-            const response = await api.get('/api/account/list', {
-                params: {
-                    page,
-                    ipp,
-                },
-            });
-            setData(response.data.data);
-            setTotal(response.data.total);
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setLoading(false);
+    const getParams = () => {
+        return {
+            page: params?.pagination?.current - 1 || 0,
+            ipp: params?.pagination?.pageSize || 10,
+            relationship_id: params?.filters?.relationship_id || 0,
+            search: params?.query || '',
+        };
+    };
+
+    // Kiểm tra xem có thể scroll trái/phải không
+    const checkScroll = () => {
+        if (scrollContainer.current) {
+            setCanScrollLeft(scrollContainer.current.scrollLeft > 0);
+            setCanScrollRight(
+                scrollContainer.current.scrollLeft +
+                    scrollContainer.current.clientWidth <
+                    scrollContainer.current.scrollWidth
+            );
         }
-    }
+    };
+
+    const onSearch = (value) => {
+        setParams({
+            ...params,
+            query: value.trim(),
+        });
+    };
 
     useEffect(() => {
         const unsubscribe = Client.subscribe(() => {
@@ -268,13 +336,74 @@ const AccountList = () => {
     }, []);
 
     useEffect(() => {
-        fetchData();
-    });
-
+        checkScroll();
+        const container = scrollContainer.current;
+        if (container) {
+            container.addEventListener('scroll', checkScroll);
+            return () => container.removeEventListener('scroll', checkScroll);
+        }
+    }, []);
 
     useEffect(() => {
+        setParams({
+            ...params,
+            pagination: {
+                ...params.pagination,
+                current: 1,
+            },
+            filters: {
+                ...params.filters,
+                relationship_id: relationship,
+            },
+        });
+    }, [relationship]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            setLoad(true);
+            try {
+                const response = await api.get('/api/account/list', {
+                    params: getParams(),
+                });
+                setData(response.data?.content || []);
+                setParams({
+                    ...params,
+                    pagination: {
+                        ...params.pagination,
+                        total: response.data.totalElements,
+                    },
+                });
+            } catch (err) {
+                setData([]);
+                console.error(err);
+            } finally {
+                setSelectedRowKeys([]);
+                setLoad(false);
+            }
+        };
         fetchData();
-    }, [page, ipp]);
+    }, [
+        params.pagination?.current,
+        params.pagination?.pageSize,
+        params.filters?.relationship_id,
+        params?.query,
+    ]);
+
+    const handleTableChange = (pagination, filters, sorter) => {
+        setParams({
+            ...params,
+            pagination,
+        });
+
+        // `dataSource` is useless since `pageSize` changed
+        if (pagination.pageSize !== params.pagination?.pageSize) {
+            setData([]);
+            setSelectedRowKeys([]);
+        }
+    };
+
+    console.log(relationships);
+
     return (
         <div className="account-list-page">
             <Header
@@ -283,33 +412,210 @@ const AccountList = () => {
                 subtitle={'Danh sách khách hàng'}
             ></Header>
             <MainContent className="account-list-content">
-            <div className="container mx-auto">
-                    <div className="flex justify-between items-center mb-4">
+                <div className="container mx-auto">
+                    <div className="flex justify-between items-center mb-1">
                         <div className="flex items-center gap-4 flex-1">
                             <div className="text-lg font-semibold">
                                 Danh sách khách hàng
                             </div>
                         </div>
                     </div>
-                    {loading && <LoadingComponent />}
-                    {!loading && data.length === 0 && <EmptyState />}
-                    {!loading && data.length !== 0 && (
-                        <PaginatedTable
-                            className={'relationship-table bg-white'}
-                            columns={getColumns(relationships, sources, navigate, users)}
-                            data={relationships}
-                            page={page}
-                            total={total}
-                            ipp={ipp}
-                            onPageChange={(page) => {
-                                setPage(page);
-                            }}
-                            onPageSizeChange={(pageSize) => {
-                                setIpp(pageSize);
-                                setPage(0);
-                            }}
-                        />
-                    )}
+                    <div className="flex flex-row mb-3 justify-between gap-2">
+                        <div className="flex flex-row gap-2">
+                            <div className="tab-container flex flex-row items-center">
+                                <div className="tab-all">
+                                    <Tag
+                                        key={'Tất cả'}
+                                        onClick={() => setRelationship(0)}
+                                        className={`hover:cursor-pointer hover:opacity-60 ${
+                                            relationship === 0
+                                                ? 'font-bold'
+                                                : ''
+                                        }`}
+                                    >
+                                        Tất cả
+                                    </Tag>
+                                </div>
+                                <div className="others-container flex flex-row items-center">
+                                    <Button
+                                        icon={<LeftOutlined />}
+                                        disabled={!canScrollLeft}
+                                        onClick={() => scroll(-1)}
+                                        className="size-[22px] mr-[7px]"
+                                        style={{
+                                            width: '22px',
+                                            height: '22px',
+                                        }}
+                                    />
+                                    <div
+                                        ref={scrollContainer}
+                                        className="flex flex-row"
+                                        style={{
+                                            gap: '0px',
+                                            overflowX: 'auto',
+                                            whiteSpace: 'nowrap',
+                                            scrollBehavior: 'smooth',
+                                            maxWidth: '600px', // Điều chỉnh độ rộng phù hợp
+                                            padding: '5px 0',
+                                            scrollbarWidth: 'none', // Ẩn scrollbar trên Firefox
+                                            msOverflowStyle: 'none', // Ẩn scrollbar trên IE
+                                        }}
+                                    >
+                                        {relationships?.map((item) => (
+                                            <Tag
+                                                color={item.color}
+                                                key={item.name}
+                                                onClick={() =>
+                                                    setRelationship(item.id)
+                                                }
+                                                className={`hover:cursor-pointer hover:opacity-60 ${
+                                                    relationship === item.id
+                                                        ? 'font-bold'
+                                                        : ''
+                                                }`}
+                                            >
+                                                {item.name}
+                                            </Tag>
+                                        ))}
+                                    </div>
+                                    <Button
+                                        icon={<RightOutlined />}
+                                        disabled={!canScrollRight}
+                                        onClick={() => scroll(1)}
+                                        className="size-[22px] ml-[5px]"
+                                        style={{
+                                            width: '22px',
+                                            height: '22px',
+                                        }}
+                                    />
+                                </div>
+                            </div>
+                            <Input.Search
+                                onSearch={onSearch}
+                                placeholder="Nhập tên, SĐT, Mã KH"
+                                prefix={<UserOutlined />}
+                                allowClear
+                                className="max-w-72 w-full"
+                            />
+                        </div>
+                        <div className="quick-actions flex flex-row gap-2 items-center">
+                            <div className='text-sm'>
+                                {hasSelected ? `Selected ${selectedRowKeys.length} items` : null}
+                            </div>
+                            <Tooltip
+                                placement="top"
+                                title="Xóa nhanh"
+                                arrow={false}
+                            >
+                                <Button
+                                    disabled={!hasSelected}
+                                    color="#233F80"
+                                    className="bg-[#233F80] text-white hover:bg-[#233F80]/90"
+                                    onClick={() => {
+                                        confirm_popup.showAlert('Are you sure you want to delete these accounts? This action can not be undone.', (choose) => {
+                                            if (choose) {
+                                                const deleteAccounts = async () => {
+                                                    try {
+                                                        loading.show();
+                                                        const response = await api.delete(
+                                                            '/api/account/delete.many',
+                                                            {
+                                                                data: selectedRowKeys,
+                                                            }
+                                                        );
+                                                        flash.success('Xóa thành công!');
+                                                        setSelectedRowKeys([]);
+                                                        navigate(0);
+                                                    } catch (err) {
+                                                        console.error(err);
+                                                    } finally {
+                                                        loading.hide();
+                                                    }
+                                                };
+                                                deleteAccounts();
+                                            }
+                                        })
+                                    }}
+                                >
+                                    <DeleteOutlined 
+                                        style={{ fontSize: '22px' }}
+                                    />
+                                </Button>
+                            </Tooltip>
+                            <Tooltip
+                                placement="top"
+                                title="Tải xuống danh sách khách hàng"
+                                arrow={false}
+                            >
+                                <Button
+                                    color="#233F80"
+                                    className="bg-[#233F80] text-white hover:bg-[#233F80]/90"
+                                >
+                                    <VerticalAlignBottomOutlined
+                                        style={{ fontSize: '22px' }}
+                                    />
+                                </Button>
+                            </Tooltip>
+                            <Tooltip
+                                placement="top"
+                                title="Tải lên danh sách khách hàng"
+                                arrow={false}
+                            >
+                                <Button
+                                    color="#233F80"
+                                    className="bg-[#233F80] text-white hover:bg-[#233F80]/90"
+                                >
+                                    <VerticalAlignTopOutlined
+                                        style={{ fontSize: '22px' }}
+                                    />
+                                </Button>
+                            </Tooltip>
+                            <Button
+                                color="#233F80"
+                                className="bg-[#233F80] text-white hover:bg-[#233F80]/90"
+                                onClick={() => navigate('/account/create')}
+                            >
+                                Thêm mới
+                            </Button>
+                        </div>
+                    </div>
+                    <div className="w-full">
+                        <ConfigProvider renderEmpty={renderEmpty}>
+                            <Table
+                                className={styles.customTable}
+                                rowSelection={rowSelection}
+                                columns={getColumns(
+                                    relationships,
+                                    sources,
+                                    navigate,
+                                    users
+                                )}
+                                rowKey={(e) => e.id}
+                                bordered
+                                dataSource={data}
+                                pagination={{
+                                    ...params.pagination,
+                                    showSizeChanger: true,
+                                    showTotal: (total, range) =>
+                                        `${range[0]}-${range[1]} of ${total} items`,
+                                    pageSizeOptions: [
+                                        10, 20, 50, 100, 500, 1000, 5000,
+                                    ],
+                                }}
+                                loading={load}
+                                onChange={handleTableChange}
+                                locale={{
+                                    emptyText: (
+                                        <Empty description="No Data"></Empty>
+                                    ),
+                                }}
+                                scroll={{
+                                    x: 'max-content',
+                                    y: 485,
+                                }}
+                            />
+                        </ConfigProvider>
+                    </div>
                 </div>
             </MainContent>
         </div>

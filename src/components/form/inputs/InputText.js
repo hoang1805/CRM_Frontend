@@ -26,6 +26,11 @@ const InputText = forwardRef((props, ref) => {
         setError(validate() || '');
     }, [value]);
 
+    useEffect(() => {
+        setValue(props.value || '');
+        setError('');
+    }, [props.value])
+
     const type = types.includes(props.type || '') ? props.type : 'text';
 
     return (

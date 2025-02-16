@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Pagination } from 'antd';
-
 const PaginatedTable = ({ className, columns, data, onPageChange, onPageSizeChange, page = 0, total = 0, ipp = 10}) => {
     return (
         <div className="table-wp react-table border-base-content/25">
