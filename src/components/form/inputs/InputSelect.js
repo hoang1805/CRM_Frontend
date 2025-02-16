@@ -1,4 +1,9 @@
-import React, { forwardRef, useImperativeHandle, useState } from 'react';
+import React, {
+    forwardRef,
+    useEffect,
+    useImperativeHandle,
+    useState,
+} from 'react';
 
 const InputSelect = forwardRef((props, ref) => {
     const [value, setValue] = useState(props.value || '');
@@ -8,19 +13,27 @@ const InputSelect = forwardRef((props, ref) => {
         resetData: () => setValue(props.value || ''),
     }));
 
+    useEffect(() => {
+        setValue(props.value || '');
+    }, [props.value]);
+
     return (
-        <div className={`form-group input-select ${props.className || ''} ${props.compact ? 'compact' : ''}`}>
+        <div
+            className={`form-group input-select ${props.className || ''} ${
+                props.compact ? 'compact' : ''
+            }`}
+        >
             {props.label && (
-                <label 
-                    className='ap-xdot group-label block mb-2 text-sm font-medium text-gray-900 dark:text-white' 
+                <label
+                    className="ap-xdot group-label block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                     htmlFor={props.name || ''}
                 >
                     {props.label}
                 </label>
             )}
-            <div className='group-input'>
-                <select 
-                    id={props.name || ''} 
+            <div className="group-input">
+                <select
+                    id={props.name || ''}
                     className="select"
                     value={value}
                     onChange={(e) => setValue(e.target.value)}
@@ -38,7 +51,6 @@ const InputSelect = forwardRef((props, ref) => {
                     </p>
                 )}
             </div>
-            
         </div>
     );
 });

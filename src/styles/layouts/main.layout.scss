@@ -11,13 +11,13 @@
         margin-left: 70px;
         background-color: rgb(243, 244, 246);
         min-height: 100vh;
-        display: flex;
+        // display: flex;
         > * {
-            flex: 1;
+            // flex: 1;
         }
 
         .main-content-wp {
-            padding: 20px 50px 50px;
+            padding: 20px 50px 10px;
         }
     }
 

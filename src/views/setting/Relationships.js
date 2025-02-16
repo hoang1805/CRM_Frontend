@@ -183,7 +183,6 @@ const Relationships = () => {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const [users, setUsers] = useState(Client.get('users'));
-    console.log(users);
 
     useEffect(() => {
         const unsubscribe = Client.subscribe(() => {
