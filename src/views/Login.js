@@ -14,6 +14,8 @@ const Login = () => {
     const auth_context = useContext(AuthContext);
     const navigate = useNavigate(); // Hook để chuyển hướng
 
+
+
     // Xử lý submit form
     const handleSubmit = async (e) => {
         e.preventDefault(); // Ngăn form reload trang
@@ -39,6 +41,12 @@ const Login = () => {
             loading.hide();
         }
     };
+
+    useEffect(() => {
+        if (auth_context.user) {
+            navigate('/home'); // Nếu đã đăng nhập, chuyển hướng đến trang home nếu còn đăng nhập
+        }
+    })
 
 
     return (
