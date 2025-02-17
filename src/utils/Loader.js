@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import api from "./Axios";
 import Client from "./client.manager";
 
@@ -20,6 +21,9 @@ const load = () => {
             }
         } catch (err) {
             console.error("Failed to load initial data:", err);
+            window.location.pathname = '/login';
+            loadPromise = null;
+            return Promise.reject(err);
         }
 
         return Client.get(); // Trả về dữ liệu đã load

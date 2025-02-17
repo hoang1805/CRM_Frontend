@@ -7,6 +7,7 @@ import popup from '../utils/popup/Popup';
 import '../styles/views/login.scss';
 import AuthContext from '../context/AuthContext';
 import flash from '../utils/Flash';
+import load from '../utils/Loader';
 
 const Login = () => {
     const [username, setUsername] = useState('');
@@ -44,7 +45,32 @@ const Login = () => {
 
     useEffect(() => {
         if (auth_context.user) {
-            navigate('/home'); // Nếu đã đăng nhập, chuyển hướng đến trang home nếu còn đăng nhập
+            // navigate('/home'); // Nếu đã đăng nhập, chuyển hướng đến trang home nếu còn đăng nhập
+            (async() => {
+                try {
+                    loading.show();
+                    const response = await api.get('/api/user');
+                    const data = response.data;
+                    const user = data.user;
+                    if (user.id === auth_context.user.id) {
+                        auth_context.login(user);
+                        flash.success('Login successful');
+                        navigate('/home');
+                    } else {
+                        auth_context.logout();
+                        flash.error('Đăng nhập thất bại');
+                        navigate(0);
+                    }
+                } catch (err) {
+                    console.error(err);
+                    auth_context.logout();
+                    flash.error('Đăng nhập thất bại');
+                    navigate(0);
+                } finally {
+                    loading.hide();
+                }
+                
+            })();
         }
     })
 
