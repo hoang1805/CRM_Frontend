@@ -1,10 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import api from '../../utils/Axios';
 import loading from '../../utils/Loading';
 import { PiUsersThreeFill } from 'react-icons/pi';
 import MainContent from '../../components/page/MainContent';
-import { Avatar, Button, Dropdown, Layout, Progress, Tooltip } from 'antd';
+import {
+    Avatar,
+    Button,
+    Card,
+    Col,
+    Dropdown,
+    Layout,
+    Progress,
+    Row,
+    Tag,
+    Tooltip,
+} from 'antd';
 import Header from '../../components/page/Header';
 import '../../styles/views/account/account.detail.scss';
 import { UserOutlined } from '@ant-design/icons';
@@ -13,14 +24,19 @@ import { FaRegCalendarMinus } from 'react-icons/fa';
 import { FaTrash } from 'react-icons/fa';
 import Arr from '../../utils/Array';
 import Client from '../../utils/client.manager';
-import { CiStar } from "react-icons/ci";
-import { LuPhone } from "react-icons/lu";
-import { LiaBirthdayCakeSolid } from "react-icons/lia";
-import { FaRegEnvelope } from "react-icons/fa";
-import { BsGenderAmbiguous } from "react-icons/bs";
-import { MdContentPaste } from "react-icons/md";
+import { CiStar } from 'react-icons/ci';
+import { LuPhone } from 'react-icons/lu';
+import { LiaBirthdayCakeSolid } from 'react-icons/lia';
+import { FaRegEnvelope } from 'react-icons/fa';
+import { BsGenderAmbiguous } from 'react-icons/bs';
+import { MdContentPaste } from 'react-icons/md';
 import DateHelpers from '../../utils/Date';
 import Gender from '../../utils/Gender';
+import { FiTarget } from 'react-icons/fi';
+import { FaRegUserCircle } from 'react-icons/fa';
+import AvatarName from '../../components/elements/AvatarName';
+import { FaStar } from 'react-icons/fa';
+import { FaMoneyBillWave } from 'react-icons/fa';
 
 const calculateCompletion = (account, users, relationships, sources) => {
     if (!account || typeof account !== 'object') return 0;
@@ -79,6 +95,17 @@ const calculateCompletion = (account, users, relationships, sources) => {
     return Math.round(completionRate); // Làm tròn %
 };
 
+const siderStyle = {
+    overflow: 'auto',
+    height: 'calc(100vh - 85px)',
+    position: 'sticky',
+    insetInlineStart: 0,
+    top: 0,
+    bottom: 0,
+    scrollbarWidth: 'thin',
+    scrollbarGutter: 'stable',
+  };
+
 const AccountDetail = () => {
     const { id } = useParams();
     const [account, setAccount] = useState({});
@@ -89,6 +116,12 @@ const AccountDetail = () => {
     );
     const [sources, setSources] = useState(Client.get('sources') || []);
     const [users, setUsers] = useState(Client.get('users') || []);
+
+    const navigate = useNavigate();
+    const [relationship, setRelationship] = useState(null);
+    const [assigned_user_id, setAssignedUserId] = useState(null);
+    const [source, setSource] = useState(null);
+    const [creator, setCreator] = useState(null);
 
     useEffect(() => {
         const unsubscribe = Client.subscribe(() => {
@@ -106,6 +139,12 @@ const AccountDetail = () => {
                 loading.show();
                 const response = await api.get(`/api/account/${id || ''}`);
                 setAccount(response.data.account);
+                setRelationship(
+                    Arr.findById(relationships, account.relationshipId)
+                );
+                setAssignedUserId(Arr.findById(users, account.assignedUserId));
+                setSource(Arr.findById(sources, account.sourceId));
+                setCreator(Arr.findById(users, account.creatorId));
             } catch (err) {
                 console.log(err);
                 setError(
@@ -115,7 +154,17 @@ const AccountDetail = () => {
                 loading.hide();
             }
         })();
-    }, []);
+    }, [
+        account.assignedUserId,
+        account.creatorId,
+        account.relationshipId,
+        account.sourceId,
+        id,
+        relationships,
+        sources,
+        users,
+    ]);
+
     return (
         <div className="account-detail">
             <Header
@@ -124,8 +173,12 @@ const AccountDetail = () => {
                 subtitle={'Chi tiết khách hàng'}
             ></Header>
             <MainContent className="account-detail-content">
-                <Layout>
-                    <Layout.Sider width={'25%'} className="mr-[5px] bg-white p-2">
+                <Layout hasSider>
+                    <Layout.Sider
+                        width={'25%'}
+                        className="mr-[5px] bg-white p-2"
+                        style={siderStyle}
+                    >
                         <div className="flex flex-row gap-2 items-center">
                             <Avatar size={64} icon={<UserOutlined />} />
                             <div className="name text-xl font-medium">
@@ -139,6 +192,9 @@ const AccountDetail = () => {
                                     icon={<MdOutlineEdit className="" />}
                                     size="large"
                                     className="bg-[#233f80] text-white"
+                                    onClick={() =>
+                                        navigate(`/account/edit/${id}`)
+                                    }
                                 ></Button>
                             </Tooltip>
                             <Tooltip
@@ -163,7 +219,9 @@ const AccountDetail = () => {
                             </Tooltip>
                         </div>
                         <div className="flex flex-row gap-4 items-center pt-2">
-                            <div style={{flexShrink: 0}}>Hoàn thiện hồ sơ</div>
+                            <div style={{ flexShrink: 0 }}>
+                                Hoàn thiện hồ sơ
+                            </div>
                             <Progress
                                 percent={calculateCompletion(
                                     account,
@@ -171,43 +229,242 @@ const AccountDetail = () => {
                                     relationships,
                                     sources
                                 )}
-                                status='active'
+                                status="active"
                             />
                         </div>
-                        <div className='pt-2'>
-                            <div className='flex flex-col gap-2 bg-blue-100 border-blue-600 rounded-lg p-1 border'>
-                                <div className='flex flex-row gap-1 items-center'>
-                                    <CiStar className='text-blue-600 size-5'/>
+                        <div className="pt-2">
+                            <div className="flex flex-col gap-2 bg-blue-100 border-blue-600 rounded-lg p-1 border">
+                                <div className="flex flex-row gap-1 items-center">
+                                    <CiStar className="text-blue-600 size-5" />
                                     {account.name}
                                 </div>
-                                <div className='flex flex-row gap-2 items-center justify-between'>
-                                    <div className='flex flex-row w-[170px] gap-1 items-center '>
-                                        <LuPhone className='text-blue-600 size-5'/>
-                                        <div className='ap-xdot'>{account.phone || 'Chưa có dữ liệu'}</div>
-                                        
+                                <div className="flex flex-row gap-2 items-center justify-between">
+                                    <div className="flex flex-row w-[170px] gap-1 items-center ">
+                                        <LuPhone className="text-blue-600 size-5" />
+                                        <div className="ap-xdot">
+                                            {account.phone || 'Chưa có dữ liệu'}
+                                        </div>
                                     </div>
-                                    <div className='flex flex-row w-[162px] gap-1 items-center'>
-                                        <FaRegEnvelope className='text-blue-600 size-5'/>
-                                        <div className='ap-xdot'>{account.email || 'Chưa có dữ liệu'}</div>
-                                    </div>
-                                </div>
-                                <div className='flex flex-rrow gap-2 items-center justify-between'>
-                                    <div className='flex flex-row w-[170px] gap-1 items-center'>
-                                        <LiaBirthdayCakeSolid className='text-blue-600 size-5'/>
-                                        <div className='ap-xdot'>{account.birthday ? DateHelpers.formatDate(account.birthday, 'DD-MM-YYYY') : 'Chưa có dữ liệu'}</div>
-                                    </div>
-                                    <div className='flex flex-row w-[170px] gap-1 items-center'>
-                                        <BsGenderAmbiguous className='text-blue-600 size-5'/>
-                                        <div className='ap-xdot'>{account.gender ? Gender.fromContext(account.gender).label : 'Chưa có dữ liệu'}</div>
+                                    <div className="flex flex-row w-[162px] gap-1 items-center">
+                                        <FaRegEnvelope className="text-blue-600 size-5" />
+                                        <div className="ap-xdot">
+                                            {account.email || 'Chưa có dữ liệu'}
+                                        </div>
                                     </div>
                                 </div>
-                                <div className='flex flex-grow gap-1 items-center'>
-                                    <MdContentPaste className='text-blue-600 size-5'/>
-                                    <div>{account?.content || 'Chưa có dữ liệu'}</div>
+                                <div className="flex flex-rrow gap-2 items-center justify-between">
+                                    <div className="flex flex-row w-[170px] gap-1 items-center">
+                                        <LiaBirthdayCakeSolid className="text-blue-600 size-5" />
+                                        <div className="ap-xdot">
+                                            {account.birthday
+                                                ? DateHelpers.formatDate(
+                                                      account.birthday,
+                                                      'DD-MM-YYYY'
+                                                  )
+                                                : 'Chưa có dữ liệu'}
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-row w-[170px] gap-1 items-center">
+                                        <BsGenderAmbiguous className="text-blue-600 size-5" />
+                                        <div className="ap-xdot">
+                                            {account.gender
+                                                ? Gender.fromContext(
+                                                      account.gender
+                                                  ).label
+                                                : 'Chưa có dữ liệu'}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="flex flex-grow gap-1 items-center">
+                                    <MdContentPaste className="text-blue-600 size-5" />
+                                    <div>
+                                        {account?.content || 'Chưa có dữ liệu'}
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div className='pt-2'></div>
+                        <div className="pt-2">
+                            <div className="flex flex-row items-center justify-between">
+                                <div className="flex flex-row items-center gap-1">
+                                    <FiTarget />
+                                    Mối quan hệ
+                                </div>
+                                <div className="w-[170px]">
+                                    <Tag
+                                        fontSize="16"
+                                        color={relationship?.color || ''}
+                                        className="ap-xdot text-center"
+                                    >
+                                        {relationship?.name ||
+                                            'Chưa có dữ liệu'}
+                                    </Tag>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="pt-2">
+                            <div className="flex flex-row items-center justify-between">
+                                <div className="flex flex-row items-center gap-1">
+                                    <FaRegUserCircle />
+                                    Người phụ trách
+                                </div>
+                                <div className="w-[170px]">
+                                    {assigned_user_id?.name ? (
+                                        <AvatarName
+                                            name={assigned_user_id.name}
+                                        />
+                                    ) : (
+                                        'Chưa có dữ liệu'
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                        <div className="pt-2 list-card">
+                            <Row gutter={16}>
+                                <Col span={8}>
+                                    <Card
+                                        className="drop-shadow-lg"
+                                        title={
+                                            <div className="flex flex-col gap-1 justify-center items-center h-23 text-center">
+                                                <div className="bg-[#233f80] text-white rounded-full size-6 flex items-center justify-center">
+                                                    <FaRegCalendarMinus className="" />
+                                                </div>
+                                                <div
+                                                    className="text-wrap text-center"
+                                                    style={{
+                                                        fontSize: 14,
+                                                        fontWeight: 400,
+                                                    }}
+                                                >
+                                                    Liên hệ lần cuối
+                                                </div>
+                                            </div>
+                                        }
+                                        hoverable
+                                    >
+                                        <div className="font-medium text-center">
+                                            10
+                                        </div>
+                                    </Card>
+                                </Col>
+                                <Col span={8}>
+                                    <Card
+                                        className="drop-shadow-lg"
+                                        title={
+                                            <div className="flex flex-col gap-1 justify-center items-center h-23 text-center">
+                                                <div className="bg-orange-600 text-white rounded-full size-6 flex items-center justify-center">
+                                                    <FaStar className="" />
+                                                </div>
+                                                <div
+                                                    className="text-wrap text-center"
+                                                    style={{
+                                                        fontSize: 14,
+                                                        fontWeight: 400,
+                                                    }}
+                                                >
+                                                    Tổng số tương tác
+                                                </div>
+                                            </div>
+                                        }
+                                        hoverable
+                                    >
+                                        <div className="font-medium text-center">
+                                            10
+                                        </div>
+                                    </Card>
+                                </Col>
+                                <Col span={8}>
+                                    <Card
+                                        className="drop-shadow-lg"
+                                        title={
+                                            <div className="flex flex-col gap-1 justify-center items-center h-23 text-center">
+                                                <div className="bg-green-500 text-white rounded-full size-6 flex items-center justify-center">
+                                                    <FaMoneyBillWave className="" />
+                                                </div>
+                                                <div
+                                                    className="text-wrap text-center"
+                                                    style={{
+                                                        fontSize: 14,
+                                                        fontWeight: 400,
+                                                    }}
+                                                >
+                                                    Giá trị đơn hàng
+                                                </div>
+                                            </div>
+                                        }
+                                        hoverable
+                                    >
+                                        <div className="font-medium text-center">
+                                            10
+                                        </div>
+                                    </Card>
+                                </Col>
+                            </Row>
+                        </div>
+                        <div className="mt-2 flex flex-col gap-2 p-2 border-2 rounded-lg">
+                            <div className="flex flex-row items-center justify-between">
+                                Nguồn
+                                <div className="font-medium">
+                                    {source?.name || 'Chưa có dữ liệu'}
+                                </div>
+                            </div>
+                            <div className="flex flex-row items-center justify-between">
+                                Người tạo
+                                <div className="font-medium">
+                                    {creator?.name || 'Chưa có dữ liệu'}
+                                </div>
+                            </div>
+                            <div className="flex flex-row items-center justify-between">
+                                Ngày tạo
+                                <div className="font-medium">
+                                    {account?.createdAt
+                                        ? DateHelpers.formatDate(
+                                              account.createdAt,
+                                              'DD/MM/YYYY HH:mm'
+                                          )
+                                        : 'Chưa có dữ liệu'}
+                                </div>
+                            </div>
+                            <div className="flex flex-row items-center justify-between">
+                                Đã mua
+                                <div className="font-medium">
+                                    {/* {source?.name || 'Chưa có dữ liệu'} */}1
+                                    lần
+                                </div>
+                            </div>
+                            <div className="flex flex-row items-center justify-between">
+                                Lần mua hàng gần nhất
+                                <div className="font-medium">
+                                    {account?.lastUpdate
+                                        ? DateHelpers.formatDate(
+                                              account.lastUpdate,
+                                              'DD/MM/YYYY HH:mm'
+                                          )
+                                        : 'Chưa có dữ liệu'}
+                                </div>
+                            </div>
+                        </div>
+                        <div className="mt-2">
+                            <Card title='Thông tin chính' className='main-info border-2'>
+                                <div>
+                                    <b>Tên khách hàng:</b> {account?.name || 'Chưa có dữ liệu'}
+                                </div>
+                                <div>
+                                    <b>Mã khách hàng:</b> {account?.code || 'Chưa có dữ liệu'}
+                                </div>
+                                <div>
+                                    <b>Email:</b> {account?.email || 'Chưa có dữ liệu'}
+                                </div>
+                                <div>
+                                    <b>Số điện thoại:</b> {account?.phone || 'Chưa có dữ liệu'}
+                                </div>
+                                <div>
+                                    <b>Ngành nghề:</b> {account?.job || 'Chưa có dữ liệu'}
+                                </div>
+                                <div>
+                                    <b>Giới tính:</b> {account?.gender ? Gender.fromContext(account.gender).label : 'Chưa có dữ liệu'}
+                                </div>
+                            </Card>
+                        </div>
                     </Layout.Sider>
                     <Layout.Content>Content</Layout.Content>
                 </Layout>
