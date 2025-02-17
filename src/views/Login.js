@@ -32,6 +32,7 @@ const Login = () => {
         // Gửi API đăng nhập (giả lập)
         try {
             const response = await api.post('/api/login', {username, password});
+            console.log(response);
             const user = response.data.user;
             auth_context.login(user);
             flash.success('Login successful');
