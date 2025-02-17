@@ -20,7 +20,7 @@ function getCsrfToken() {
 // Hàm refresh CSRF token
 async function refreshCsrfToken() {
     try {
-        await api.get("/csrf-token"); // Gọi API để lấy CSRF mới
+        await api.get("/api/csrf.token"); // Gọi API để lấy CSRF mới
         return getCsrfToken(); // Lấy lại token sau khi refresh
     } catch (error) {
         console.error("Không thể refresh CSRF token", error);
