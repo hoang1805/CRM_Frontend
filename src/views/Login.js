@@ -3,11 +3,9 @@ import { useNavigate, Link } from 'react-router-dom';
 import loading from '../utils/Loading';
 import error_popup from '../utils/popup/ErrorPopup';
 import api from '../utils/Axios';
-import popup from '../utils/popup/Popup';
 import '../styles/views/login.scss';
 import AuthContext from '../context/AuthContext';
 import flash from '../utils/Flash';
-import load from '../utils/Loader';
 
 const Login = () => {
     const [username, setUsername] = useState('');
