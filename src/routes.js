@@ -15,6 +15,7 @@ import flash from './utils/Flash';
 import Sources from './views/setting/Sources';
 import Relationships from './views/setting/Relationships';
 import EditAccount from './views/account/EditAccount';
+import AccountDetail from './views/account/AccountDetail';
 
 function PrivateRoute({ element, roles = [] }) {
     const { user } = useContext(AuthContext);
@@ -53,7 +54,8 @@ const router = createBrowserRouter([
             {path: '', element: <Navigate to='/account/list' /> },
             {path: 'list', element: <PrivateRoute element={<AccountList />} />},
             {path: 'create', element: <PrivateRoute element={<AddAccount />} />},
-            {path: 'edit/:id', element: <PrivateRoute element={<EditAccount />} />}
+            {path: 'edit/:id', element: <PrivateRoute element={<EditAccount />} />},
+            {path: ':id', element: <PrivateRoute element={<AccountDetail />} />}
         ],
     }, 
     {
