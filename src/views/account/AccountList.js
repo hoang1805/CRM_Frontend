@@ -402,8 +402,6 @@ const AccountList = () => {
         }
     };
 
-    console.log(relationships);
-
     return (
         <div className="account-list-page">
             <Header
@@ -599,7 +597,7 @@ const AccountList = () => {
                                     showTotal: (total, range) =>
                                         `${range[0]}-${range[1]} of ${total} items`,
                                     pageSizeOptions: [
-                                        10, 20, 50, 100, 500, 1000, 5000,
+                                        10, 20, 50, 100, 500,
                                     ],
                                 }}
                                 loading={load}
