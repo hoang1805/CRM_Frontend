@@ -4,7 +4,7 @@ import { RiSettings3Fill } from 'react-icons/ri';
 import MainContent from '../../components/page/MainContent';
 import api from '../../utils/Axios';
 import drawer from '../../utils/Drawer';
-import SourceForm from '../../components/sources/SourceForm';
+import SourceDrawerForm from '../../components/sources/SourceDrawerForm';
 import Table from '../../components/table/Table';
 import '../../styles/views/setting/sources.scss';
 import { useNavigate } from 'react-router-dom';
@@ -69,18 +69,21 @@ const getColumns = (sources, user, navigate) => {
                                 className="btn btn-circle btn-text btn-sm"
                                 aria-label="Action button"
                                 onClick={() => {
-                                    drawer.show({
+                                    drawer.showForm({
+                                        title: 'Cập nhật nguồn khách hàng',
+                                        url: `/api/source/edit/${e.id}`,
+                                        callback: () => {
+                                            flash.success(
+                                                'Cập nhật thành công!'
+                                            );
+                                            navigate(0);
+                                        },
+                                        width: 500,
+                                        submit: 'Cập nhật',
                                         content: (
-                                            <SourceForm
-                                                url={`/api/source/edit/${e.id}`}
-                                                title="Cập nhật nguồn khách hàng"
+                                            <SourceDrawerForm
                                                 value={e}
-                                                submit="Cập nhật"
                                                 sources={sources}
-                                                callback={() => {
-                                                    flash.success('Cập nhật thành công!');
-                                                    navigate(0);
-                                                }}
                                             />
                                         ),
                                     });
@@ -215,7 +218,7 @@ const Sources = () => {
                             onClick={() =>
                                 drawer.show({
                                     content: (
-                                        <SourceForm
+                                        <SourceDrawerForm
                                             url="/api/source/create"
                                             title="Thêm nguồn khách hàng"
                                             sources={sources}

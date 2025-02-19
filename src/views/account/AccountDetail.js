@@ -19,26 +19,9 @@ import {
 } from 'antd';
 import Header from '../../components/page/Header';
 import '../../styles/views/account/account.detail.scss';
-import { UserOutlined } from '@ant-design/icons';
-import { MdOutlineEdit } from 'react-icons/md';
-import { FaRegCalendarMinus } from 'react-icons/fa';
-import { FaTrash } from 'react-icons/fa';
-import Arr from '../../utils/Array';
-import Client from '../../utils/client.manager';
-import { CiStar } from 'react-icons/ci';
-import { LuPhone } from 'react-icons/lu';
-import { LiaBirthdayCakeSolid } from 'react-icons/lia';
-import { FaRegEnvelope } from 'react-icons/fa';
-import { BsGenderAmbiguous } from 'react-icons/bs';
-import { MdContentPaste } from 'react-icons/md';
-import DateHelpers from '../../utils/Date';
-import Gender from '../../utils/Gender';
-import { FiTarget } from 'react-icons/fi';
-import { FaRegUserCircle } from 'react-icons/fa';
-import AvatarName from '../../components/elements/AvatarName';
-import { FaStar } from 'react-icons/fa';
-import { FaMoneyBillWave } from 'react-icons/fa';
 import AccountInformation from './details/AccountInformation';
+import flyonui from 'flyonui';
+import AccountTask from './details/AccountTask';
 
 const siderStyle = {
     overflow: 'auto',
@@ -79,6 +62,7 @@ const AccountDetail = () => {
         id,
     ]);
 
+
     return (
         <div className="account-detail">
             <Header
@@ -90,19 +74,19 @@ const AccountDetail = () => {
                 <Layout hasSider>
                     <Layout.Sider
                         width={'25%'}
-                        className="mr-[5px] bg-white p-2"
+                        className="mr-[5px] bg-white p-2 border rounded-lg"
                         style={siderStyle}
                     >
                         <AccountInformation account={account} />
                     </Layout.Sider>
-                    <Layout.Content>
-                        <Tabs
+                    <Layout.Content className="ml-[5px] bg-white p-2 border rounded-lg">
+                        <Tabs className='pl-[5px]'
                             defaultActiveKey="1"
                             items={[
                                 {
                                     label: 'Lịch hẹn',
                                     key: '1',
-                                    children: '1',
+                                    children: <AccountTask account={account}/>,
                                 },
                                 {
                                     label: 'Giao dịch',

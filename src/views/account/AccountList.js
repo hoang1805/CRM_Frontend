@@ -68,6 +68,9 @@ const getColumns = (relationships, sources, navigate, users = []) => {
             width: 150,
             fixed: 'left',
             ellipsis: true,
+            render: (text, e) => {
+                return <a href={`/account/${e.id}`}>{text}</a>
+            },
         },
         {
             title: 'Mã KH',
