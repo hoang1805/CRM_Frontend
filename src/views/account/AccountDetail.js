@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import api from '../../utils/Axios';
 import loading from '../../utils/Loading';
 import { PiUsersThreeFill } from 'react-icons/pi';
@@ -22,6 +22,7 @@ import '../../styles/views/account/account.detail.scss';
 import AccountInformation from './details/AccountInformation';
 import flyonui from 'flyonui';
 import AccountTask from './details/AccountTask';
+import AccountProduct from './details/AccountProduct';
 
 const siderStyle = {
     overflow: 'auto',
@@ -38,6 +39,12 @@ const AccountDetail = () => {
     const { id } = useParams();
     const [account, setAccount] = useState({});
     const [error, setError] = useState({});
+    const location = useLocation();
+    const navigate = useNavigate();
+    const query_params = new URLSearchParams(location.search);
+    const tab = query_params.get('tab') || 'task';
+
+    const [current_tab, setTab] = useState(tab);
 
     useEffect(() => {
         (async () => {
@@ -62,7 +69,6 @@ const AccountDetail = () => {
         id,
     ]);
 
-
     return (
         <div className="account-detail">
             <Header
@@ -80,22 +86,38 @@ const AccountDetail = () => {
                         <AccountInformation account={account} />
                     </Layout.Sider>
                     <Layout.Content className="ml-[5px] bg-white p-2 border rounded-lg">
-                        <Tabs className='pl-[5px]'
-                            defaultActiveKey="1"
+                        <Tabs
+                            className="pl-[5px]"
+                            defaultActiveKey={'task'}
+                            activeKey={current_tab}
+                            onTabClick={(key) => {
+                                query_params.set('tab', key);
+                                setTab(key);
+                                navigate(
+                                    `${
+                                        location.pathname
+                                    }?${query_params.toString()}`,
+                                    {
+                                        replace: true, // Tránh tạo thêm một entry mới trong history
+                                    }
+                                );
+                            }}
                             items={[
                                 {
                                     label: 'Lịch hẹn',
-                                    key: '1',
-                                    children: <AccountTask account={account}/>,
+                                    key: 'task',
+                                    children: <AccountTask account={account} />,
                                 },
                                 {
                                     label: 'Giao dịch',
-                                    key: '2',
-                                    children: '2',
+                                    key: 'product',
+                                    children: (
+                                        <AccountProduct account={account} />
+                                    ),
                                 },
                                 {
                                     label: 'Khách hàng phản hồi',
-                                    key: '3',
+                                    key: 'feedback',
                                     children: '3',
                                 },
                             ]}
