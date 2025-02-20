@@ -44,7 +44,11 @@ const InlineForm = (props) => {
         }
         loading.show();
         
-        const data = {};
+        let data = {};
+        if (props.extras_data) {
+            data = {...props.extras_data, ...data };
+        }
+        
         for (const key in child_refs.current) {
             if (child_refs.current[key] && typeof child_refs.current[key].getData === 'function') 
                 {

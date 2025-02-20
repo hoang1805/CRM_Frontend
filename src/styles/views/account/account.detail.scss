@@ -1,0 +1,22 @@
+.account-detail {
+    .main-content-wp{
+        padding: 5px !important;
+        .list-card {
+            .ant-card {
+                .ant-card-head {
+                    padding: 2px 15px !important;
+                }
+            }
+        }
+        .main-info {
+            .ant-card-head, .ant-card-body {
+                padding: 0.5rem !important;
+            }
+            .ant-card-body {
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+            }
+        }
+    }
+}

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Header from '../../components/page/Header';
 import { RiSettings3Fill } from 'react-icons/ri';
 import MainContent from '../../components/page/MainContent';
@@ -11,7 +11,7 @@ import flash from '../../utils/Flash';
 import confirm_popup from '../../utils/popup/ConfirmPopup';
 import error_popup from '../../utils/popup/ErrorPopup';
 import loading from '../../utils/Loading';
-import RelationshipForm from '../../components/relationships/RelationshipForm';
+import RelationshipDrawerForm from '../../components/relationships/RelationshipDrawerForm';
 import InputColorPicker from '../../components/form/inputs/InputColorPicker';
 import DateHelpers from '../../utils/Date';
 import Client from '../../utils/client.manager';
@@ -38,7 +38,7 @@ const LoadingComponent = () => {
     );
 };
 
-const getColumns = (relationships, navigate, users = []) => {
+const getColumns = (relationships, navigate, users = [], formRef) => {
     return [
         {
             name: 'Tên mối quan hệ',
@@ -76,12 +76,14 @@ const getColumns = (relationships, navigate, users = []) => {
             },
             style: {
                 maxWidth: '250px',
-            }
+            },
         },
         {
             name: 'Người tạo / Ngày tạo',
             render: (e) => {
-                const user = users.find((u) => u.id === e.creatorId || u.id === e.creator_id);
+                const user = users.find(
+                    (u) => u.id === e.creatorId || u.id === e.creator_id
+                );
                 return (
                     <div>
                         <div>{user?.name || 'Không có dữ liệu'}</div>
@@ -106,20 +108,21 @@ const getColumns = (relationships, navigate, users = []) => {
                                 className="btn btn-circle btn-text btn-sm"
                                 aria-label="Action button"
                                 onClick={() => {
-                                    drawer.show({
+                                    drawer.showForm({
+                                        title: 'Cập nhật mối quan hệ',
+                                        url: `/api/relationship/edit/${e.id}`,
+                                        callback: () => {
+                                            flash.success(
+                                                'Cập nhật thành công!'
+                                            );
+                                            navigate(0);
+                                        },
+                                        width: 500,
+                                        submit: 'Cập nhật',
                                         content: (
-                                            <RelationshipForm
-                                                url={`/api/relationship/edit/${e.id}`}
-                                                title="Cập nhật mối quan hệ"
+                                            <RelationshipDrawerForm
                                                 value={e}
                                                 submit="Cập nhật"
-                                                relationships={relationships}
-                                                callback={() => {
-                                                    flash.success(
-                                                        'Cập nhật thành công!'
-                                                    );
-                                                    navigate(0);
-                                                }}
                                             />
                                         ),
                                     });
@@ -179,6 +182,7 @@ const getColumns = (relationships, navigate, users = []) => {
 };
 
 const Relationships = () => {
+    const formRef = useRef({});
     const [relationships, setRelationships] = useState([]);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
@@ -191,7 +195,7 @@ const Relationships = () => {
 
         return () => unsubscribe();
     }, []);
-    
+
     useEffect(() => {
         async function loadRelationships() {
             setLoading(true);
@@ -231,24 +235,19 @@ const Relationships = () => {
                         </div>
                         <button
                             className="btn bg-[#233F80] text-white hover:bg-[#233F80]/90"
-                            onClick={() =>
-                                drawer.show({
-                                    content: (
-                                        <RelationshipForm
-                                            url="/api/relationship/create"
-                                            title="Thêm mối quan hệ"
-                                            relationships={relationships}
-                                            submit="Thêm mới"
-                                            callback={() => {
-                                                flash.success(
-                                                    'Thêm mối quan hệ thành công!'
-                                                );
-                                                navigate(0);
-                                            }}
-                                        />
-                                    ),
-                                })
-                            }
+                            onClick={() => {
+                                drawer.showForm({
+                                    title: 'Thêm mối quan hệ',
+                                    url: `/api/relationship/create`,
+                                    callback: () => {
+                                        flash.success('Thêm thành công!');
+                                        navigate(0);
+                                    },
+                                    width: 500,
+                                    submit: 'Thêm',
+                                    content: <RelationshipDrawerForm />,
+                                });
+                            }}
                         >
                             Thêm mới
                         </button>
@@ -258,7 +257,12 @@ const Relationships = () => {
                     {!loading && relationships.length !== 0 && (
                         <Table
                             className={'relationship-table bg-white'}
-                            columns={getColumns(relationships, navigate, users)}
+                            columns={getColumns(
+                                relationships,
+                                navigate,
+                                users,
+                                formRef
+                            )}
                             data={relationships}
                         />
                     )}

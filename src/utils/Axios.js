@@ -31,17 +31,18 @@ async function refreshCsrfToken() {
 // Interceptor để thêm CSRF token trước mỗi request
 api.interceptors.request.use(async (config) => {
     let csrfToken = getCsrfToken();
+    console.log(config);
 
-    if (!csrfToken && config.method !== "get") {
-        console.log("CSRF hết hạn hoặc không có. Đang refresh...");
-        csrfToken = await refreshCsrfToken();
+    // if (!csrfToken && config.method !== "get") {
+    //     console.log("CSRF hết hạn hoặc không có. Đang refresh...");
+    //     csrfToken = await refreshCsrfToken();
 
-        if (!csrfToken) {
-            console.log("Không thể lấy lại CSRF. Yêu cầu người dùng đăng nhập.");
-            window.location.href = "/login"; // Chuyển hướng đến trang đăng nhập
-            return Promise.reject("CSRF token hết hạn");
-        }
-    }
+    //     if (!csrfToken) {
+    //         console.log("Không thể lấy lại CSRF. Yêu cầu người dùng đăng nhập.");
+    //         window.location.href = "/login"; // Chuyển hướng đến trang đăng nhập
+    //         return Promise.reject("CSRF token hết hạn");
+    //     }
+    // }
 
     config.headers["X-XSRF-TOKEN"] = csrfToken;
     return config;
