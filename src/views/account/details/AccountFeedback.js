@@ -183,7 +183,6 @@ const AccountFeedback = ({ account }) => {
                                     'Gửi mail đánh giá cho khách hàng thành công'
                                 );
                             } catch (e) {
-                                console.error(e);
                                 if (e.response?.status === 429) {
                                     flash.error(
                                         'Bạn đã gửi mail đánh giá cho khách hàng. Vui lòng thử lại sau 15 phút.'
