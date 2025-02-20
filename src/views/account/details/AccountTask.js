@@ -61,14 +61,12 @@ const getActions = (task, account, user) => {
         set_start = {
             label: (
                 <div
-                    onClick={() => {
+                    onClick={async () => {
                         try {
-                            (async () => {
-                                loading.show();
-                                await api.post(`/api/task/start/${task.id}`);
-                                flash.success('Thay đổi trạng thái thành công');
-                                window.location.reload();
-                            })();
+                            loading.show();
+                            await api.post(`/api/task/start/${task.id}`);
+                            flash.success('Thay đổi trạng thái thành công');
+                            window.location.reload();
                         } catch (e) {
                             console.error(e);
                             flash.error('Thay đổi trạng thái thất bại');
@@ -88,16 +86,14 @@ const getActions = (task, account, user) => {
         request_approval = {
             label: (
                 <div
-                    onClick={() => {
+                    onClick={async () => {
                         try {
-                            (async () => {
-                                loading.show();
-                                await api.post(
-                                    `/api/task/request.approval/${task.id}`
-                                );
-                                flash.success('Thay đổi trạng thái thành công');
-                                window.location.reload();
-                            })();
+                            loading.show();
+                            await api.post(
+                                `/api/task/request.approval/${task.id}`
+                            );
+                            flash.success('Thay đổi trạng thái thành công');
+                            window.location.reload();
                         } catch (e) {
                             console.error(e);
                             flash.error('Thay đổi trạng thái thất bại');
@@ -117,14 +113,12 @@ const getActions = (task, account, user) => {
         approve = {
             label: (
                 <div
-                    onClick={() => {
+                    onClick={async () => {
                         try {
-                            (async () => {
-                                loading.show();
-                                await api.post(`/api/task/approve/${task.id}`);
-                                flash.success('Thay đổi trạng thái thành công');
-                                window.location.reload();
-                            })();
+                            loading.show();
+                            await api.post(`/api/task/approve/${task.id}`);
+                            flash.success('Thay đổi trạng thái thành công');
+                            window.location.reload();
                         } catch (e) {
                             console.error(e);
                             flash.error('Thay đổi trạng thái thất bại');
@@ -144,14 +138,12 @@ const getActions = (task, account, user) => {
         reject = {
             label: (
                 <div
-                    onClick={() => {
+                    onClick={async () => {
                         try {
-                            (async () => {
-                                loading.show();
-                                await api.post(`/api/task/reject/${task.id}`);
-                                flash.success('Thay đổi trạng thái thành công');
-                                window.location.reload();
-                            })();
+                            loading.show();
+                            await api.post(`/api/task/reject/${task.id}`);
+                            flash.success('Thay đổi trạng thái thành công');
+                            window.location.reload();
                         } catch (e) {
                             console.error(e);
                             flash.error('Thay đổi trạng thái thất bại');
@@ -167,18 +159,16 @@ const getActions = (task, account, user) => {
     }
 
     let complete = null;
-    if (acl.review && task.status == TaskStatus.COMPLETED) {
+    if (acl.review && task.status == TaskStatus.APPROVED) {
         complete = {
             label: (
                 <div
-                    onClick={() => {
+                    onClick={async () => {
                         try {
-                            (async () => {
-                                loading.show();
-                                await api.post(`/api/task/complete/${task.id}`);
-                                flash.success('Thay đổi trạng thái thành công');
-                                window.location.reload();
-                            })();
+                            loading.show();
+                            await api.post(`/api/task/complete/${task.id}`);
+                            flash.success('Thay đổi trạng thái thành công');
+                            window.location.reload();
                         } catch (e) {
                             console.error(e);
                             flash.error('Thay đổi trạng thái thất bại');
@@ -200,14 +190,12 @@ const getActions = (task, account, user) => {
         cancel = {
             label: (
                 <div
-                    onClick={() => {
+                    onClick={async () => {
                         try {
-                            (async () => {
-                                loading.show();
-                                await api.post(`/api/task/cancel/${task.id}`);
-                                flash.success('Thay đổi trạng thái thành công');
-                                window.location.reload();
-                            })();
+                            loading.show();
+                            await api.post(`/api/task/cancel/${task.id}`);
+                            flash.success('Thay đổi trạng thái thành công');
+                            window.location.reload();
                         } catch (e) {
                             console.error(e);
                             flash.error('Thay đổi trạng thái thất bại');
@@ -258,16 +246,14 @@ const getActions = (task, account, user) => {
             {
                 label: (
                     <div
-                        onClick={() => {
+                        onClick={async () => {
                             try {
-                                (async () => {
-                                    loading.show();
-                                    const response = await api.post(
-                                        `/api/task/duplicate/${task.id}`
-                                    );
-                                    flash.success('Sao chép thành công!');
-                                    window.location.reload();
-                                })();
+                                loading.show();
+                                const response = await api.post(
+                                    `/api/task/duplicate/${task.id}`
+                                );
+                                flash.success('Sao chép thành công!');
+                                window.location.reload();
                             } catch (err) {
                                 flash.error('Sao chép thất bại!');
                             } finally {

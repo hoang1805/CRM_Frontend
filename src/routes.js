@@ -16,6 +16,8 @@ import Sources from './views/setting/Sources';
 import Relationships from './views/setting/Relationships';
 import EditAccount from './views/account/EditAccount';
 import AccountDetail from './views/account/AccountDetail';
+import Feedback from './views/public/Feedback';
+import PublicLayout from './layouts/PublicLayout';
 
 function PrivateRoute({ element, roles = [] }) {
     const { user } = useContext(AuthContext);
@@ -72,6 +74,13 @@ const router = createBrowserRouter([
         element: <AuthLayout />,
         children: [{ path: '', element: <Login /> }],
     },
+    {
+        path: '/public',
+        element: <PublicLayout />,
+        children: [
+            { path: 'feedback/:token', element: <Feedback /> },
+        ],
+    }
 ]);
 
 export default router;

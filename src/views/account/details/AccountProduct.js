@@ -58,16 +58,14 @@ const getActions = (product) => {
             {
                 label: (
                     <div
-                        onClick={() => {
+                        onClick={async () => {
                             try {
-                                (async () => {
-                                    loading.show();
-                                    const response = await api.post(
-                                        `/api/account/product/duplicate/${product.id}`
-                                    );
-                                    flash.success('Sao chép thành công!');
-                                    window.location.reload();
-                                })();
+                                loading.show();
+                                const response = await api.post(
+                                    `/api/account/product/duplicate/${product.id}`
+                                );
+                                flash.success('Sao chép thành công!');
+                                window.location.reload();
                             } catch (err) {
                                 flash.error('Sao chép thất bại!');
                             } finally {
@@ -333,9 +331,7 @@ const AccountProduct = ({ account }) => {
                                 ...prev_params,
                                 filters: {
                                     ...prev_params.filters,
-                                    end: date
-                                        ? +dayjs(date, 'DD-MM-YYYY')
-                                        : 0,
+                                    end: date ? +dayjs(date, 'DD-MM-YYYY') : 0,
                                 },
                             }));
                         }}
@@ -385,7 +381,7 @@ const AccountProduct = ({ account }) => {
                         }}
                         scroll={{
                             x: 'max-content',
-                            y: 455,
+                            y: 410,
                         }}
                         expandable={{
                             expandedRowRender: (record) => {

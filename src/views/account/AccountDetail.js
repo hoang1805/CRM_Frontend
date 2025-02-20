@@ -23,6 +23,7 @@ import AccountInformation from './details/AccountInformation';
 import flyonui from 'flyonui';
 import AccountTask from './details/AccountTask';
 import AccountProduct from './details/AccountProduct';
+import AccountFeedback from './details/AccountFeedback';
 
 const siderStyle = {
     overflow: 'auto',
@@ -118,7 +119,9 @@ const AccountDetail = () => {
                                 {
                                     label: 'Khách hàng phản hồi',
                                     key: 'feedback',
-                                    children: '3',
+                                    children: (
+                                        <AccountFeedback account={account} />
+                                    ),
                                 },
                             ]}
                         />
