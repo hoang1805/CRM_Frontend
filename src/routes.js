@@ -19,6 +19,7 @@ import AccountDetail from './views/account/AccountDetail';
 import Feedback from './views/public/Feedback';
 import PublicLayout from './layouts/PublicLayout';
 import TaskPage from './views/TaskPage';
+import AccountImport from './views/account/AccountImport';
 
 function PrivateRoute({ element, roles = [] }) {
     const { user } = useContext(AuthContext);
@@ -58,7 +59,8 @@ const router = createBrowserRouter([
             {path: 'list', element: <PrivateRoute element={<AccountList />} />},
             {path: 'create', element: <PrivateRoute element={<AddAccount />} />},
             {path: 'edit/:id', element: <PrivateRoute element={<EditAccount />} />},
-            {path: ':id', element: <PrivateRoute element={<AccountDetail />} />}
+            {path: ':id', element: <PrivateRoute element={<AccountDetail />} />},
+            {path: 'import', element: <PrivateRoute element={<AccountImport />} />},
         ],
     }, 
     {
