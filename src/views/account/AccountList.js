@@ -33,6 +33,7 @@ import {
     VerticalAlignTopOutlined,
 } from '@ant-design/icons';
 import loading from '../../utils/Loading';
+import helpers from '../../utils/Helpers';
 const useStyle = createStyles(({ css, token }) => {
     const { antCls } = token;
 
@@ -189,7 +190,7 @@ const getColumns = (relationships, sources, navigate, users = []) => {
                 console.log(e);
                 return (
                     <>
-                        
+
                         <button
                             className="btn btn-circle btn-text btn-sm"
                             aria-label="Action button"
@@ -200,7 +201,7 @@ const getColumns = (relationships, sources, navigate, users = []) => {
                         >
                             <span className="icon-[tabler--pencil] size-5"></span>
                         </button>
-                        
+
                         {acl?.delete || acl?.delete == null ? (
                             <button
                                 className="btn btn-circle btn-text btn-sm"
@@ -315,8 +316,8 @@ const AccountList = () => {
             setCanScrollLeft(scrollContainer.current.scrollLeft > 0);
             setCanScrollRight(
                 scrollContainer.current.scrollLeft +
-                    scrollContainer.current.clientWidth <
-                    scrollContainer.current.scrollWidth
+                scrollContainer.current.clientWidth <
+                scrollContainer.current.scrollWidth
             );
         }
     };
@@ -428,11 +429,10 @@ const AccountList = () => {
                                     <Tag
                                         key={'Tất cả'}
                                         onClick={() => setRelationship(0)}
-                                        className={`hover:cursor-pointer hover:opacity-60 ${
-                                            relationship === 0
-                                                ? 'font-bold'
-                                                : ''
-                                        }`}
+                                        className={`hover:cursor-pointer hover:opacity-60 ${relationship === 0
+                                            ? 'font-bold'
+                                            : ''
+                                            }`}
                                     >
                                         Tất cả
                                     </Tag>
@@ -469,11 +469,10 @@ const AccountList = () => {
                                                 onClick={() =>
                                                     setRelationship(item.id)
                                                 }
-                                                className={`hover:cursor-pointer hover:opacity-60 ${
-                                                    relationship === item.id
-                                                        ? 'font-bold'
-                                                        : ''
-                                                }`}
+                                                className={`hover:cursor-pointer hover:opacity-60 ${relationship === item.id
+                                                    ? 'font-bold'
+                                                    : ''
+                                                    }`}
                                             >
                                                 {item.name}
                                             </Tag>
@@ -538,7 +537,7 @@ const AccountList = () => {
                                         })
                                     }}
                                 >
-                                    <DeleteOutlined 
+                                    <DeleteOutlined
                                         style={{ fontSize: '22px' }}
                                     />
                                 </Button>
@@ -549,8 +548,43 @@ const AccountList = () => {
                                 arrow={false}
                             >
                                 <Button
+                                    disabled={!hasSelected}
                                     color="#233F80"
                                     className="bg-[#233F80] text-white hover:bg-[#233F80]/90"
+                                    onClick={async () => {
+                                        try {
+                                            loading.show();
+                                            const response = await api.post('/api/account/export',
+                                                selectedRowKeys
+                                                , { responseType: 'blob' });
+                                            console.log(response);
+
+                                            const disposition = response.headers['content-disposition'];
+                                            let fileName = 'export.xlsx'; // Đặt mặc định
+                                            if (disposition) {
+                                                const match = disposition.match(/filename="?(.+?)"?$/);
+                                                if (match) fileName = match[1];
+                                            }
+
+                                            // console.log(response);
+
+                                            // Tạo URL để tải xuống file
+                                            const url = window.URL.createObjectURL(new Blob([response.data]));
+                                            const link = document.createElement('a');
+                                            link.href = url;
+                                            link.setAttribute('download', fileName);
+                                            document.body.appendChild(link);
+                                            link.click();
+                                            link.remove();
+                                            window.URL.revokeObjectURL(url);
+                                            flash.success('Tải xuống thành công');
+                                        } catch (err) {
+                                            console.log(err);
+                                            flash.error('Tải xuống thất bại');
+                                        } finally {
+                                            loading.hide();
+                                        }
+                                    }}
                                 >
                                     <VerticalAlignBottomOutlined
                                         style={{ fontSize: '22px' }}
@@ -565,6 +599,7 @@ const AccountList = () => {
                                 <Button
                                     color="#233F80"
                                     className="bg-[#233F80] text-white hover:bg-[#233F80]/90"
+                                    onClick={() => navigate('/account/import')}
                                 >
                                     <VerticalAlignTopOutlined
                                         style={{ fontSize: '22px' }}

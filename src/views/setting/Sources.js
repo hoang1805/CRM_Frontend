@@ -216,17 +216,17 @@ const Sources = () => {
                         <button
                             className="btn bg-[#233F80] text-white hover:bg-[#233F80]/90"
                             onClick={() =>
-                                drawer.show({
+                                drawer.showForm({
+                                    title: "Thêm nguồn khách hàng",
+                                    url: "/api/source/create",
+                                    callback:() => {
+                                        flash.success('Thêm nguồn khách hàng thành công!');
+                                        navigate(0);
+                                    },
+                                    submit: 'Thêm mới',
                                     content: (
                                         <SourceDrawerForm
-                                            url="/api/source/create"
-                                            title="Thêm nguồn khách hàng"
                                             sources={sources}
-                                            submit="Thêm mới"
-                                            callback={() => {
-                                                flash.success('Thêm nguồn khách hàng thành công!');
-                                                navigate(0);
-                                            }}
                                         />
                                     ),
                                 })
