@@ -176,15 +176,7 @@ const AccountImportCheck = (props) => {
                     }
                 );
 
-                console.log(response);
-                if (!response?.data.length) {
-                    error_popup.show(
-                        'Tải lên thất bại. Không có hàng nào được tải lên'
-                    );
-                    return;
-                }
-
-                props.onImport();
+                props.onImport(response.data);
 
                 
             } catch (err) {
@@ -192,7 +184,7 @@ const AccountImportCheck = (props) => {
                 error_popup.show(
                     err?.response?.data?.message ||
                         err.message ||
-                        'Tải lên thất bại'
+                        'Tải lên khách hàng thất bại'
                 );
             } finally {
                 props.callback(false); // Báo hiệu kết thúc xử lý
@@ -208,7 +200,7 @@ const AccountImportCheck = (props) => {
                         Danh sách khách hàng
                     </div>
                     <div className="flex flex-row gap-2">
-                        <Button type="primary">Xác nhận</Button>
+                        <Button type="primary" onClick={handleSubmit}>Xác nhận</Button>
                         <Button onClick={() => navigate(0)}>Hủy</Button>
                     </div>
                 </div>

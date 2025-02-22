@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { PiUsersThreeFill } from 'react-icons/pi';
 import MainContent from '../../components/page/MainContent';
-import { Steps } from 'antd';
+import { Button, Result, Steps } from 'antd';
 import AccountImportForm from './import/AccountImportForm';
 import Header from '../../components/page/Header';
 import AccountImportCheck from './import/AccountImportCheck';
+import { useNavigate } from 'react-router-dom';
 
 const getStep1 = (current, loading) => {
     if (current == 0) {
@@ -76,12 +77,14 @@ const AccountImport = () => {
     const [current, setCurrent] = useState(0);
     const [data, setData] = useState({});
     const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
     const onUpload = (data) => {
         setData(data);
         setCurrent(current + 1);
     };
 
-    const onImport = () => {
+    const onImport = (data) => {
+        setData(data);
         setCurrent(current + 1);
     }
 
@@ -113,6 +116,16 @@ const AccountImport = () => {
                         />
                     )}
                     {current == 1 && <AccountImportCheck data={data} loading={loading} callback={setLoading} onImport={onImport} />}
+                    {current == 2 && <div><Result
+                        status="success"
+                        title="Tải lên thành công!"
+                        subTitle={`Bạn đã thêm ${data.success || 0} khách hàng thành công`}
+                        extra={[
+                            <Button type="primary" onClick={() => navigate('/home')}>
+                                Trở về trang chủ
+                            </Button>,
+                        ]}
+                    /></div>}
                 </div>
             </MainContent>
         </div>
