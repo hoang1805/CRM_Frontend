@@ -4,6 +4,7 @@ import React, {
     useImperativeHandle,
     useState,
 } from 'react';
+import { Select, Spin } from 'antd';
 
 const InputSelect = forwardRef((props, ref) => {
     const [value, setValue] = useState(props.value || '');
@@ -32,19 +33,19 @@ const InputSelect = forwardRef((props, ref) => {
                 </label>
             )}
             <div className="group-input">
-                <select
-                    id={props.name || ''}
-                    className="select"
+                <Select
+                    showSearch
+                    className="w-full"
+                    placeholder={props.placeholder}
                     value={value}
-                    onChange={(e) => setValue(e.target.value)}
-                >
-                    {props.placeholder && <option>{props.placeholder}</option>}
-                    {props.options?.map((option, index) => (
-                        <option key={index} value={option.value || option.id}>
-                            {option.label || option.name || ''}
-                        </option>
-                    ))}
-                </select>
+                    onSelect={(value) => {
+                        setValue(value);
+                    }}
+                    options={props.options?.map((item) => ({
+                        value: item.value || item.id,
+                        label: item.label || item.name || '',
+                    }))}
+                />
                 {props.explanation && (
                     <p className="explanation mt-2 text-sm text-gray-500 dark:text-gray-400">
                         {props.explanation}

@@ -9,7 +9,7 @@ import DateHelpers from '../utils/Date';
 import loading from '../utils/Loading';
 import flash from '../utils/Flash';
 import api from '../utils/Axios';
-import confirm_popup from '../utils/popup/ConfirmPopup';
+import confirm from '../utils/popup/ConfirmPopup';
 import TaskDrawerForm from '../components/task/TaskDrawerForm';
 import drawer from '../utils/Drawer';
 import Client from '../utils/client.manager';
@@ -266,7 +266,7 @@ const getActions = (task, user) => {
                 label: (
                     <div
                         onClick={() => {
-                            confirm_popup.showAlert(
+                            confirm.show(
                                 'Are you sure you want to delete this task? This action can not be undone.',
                                 (choose) => {
                                     if (choose) {

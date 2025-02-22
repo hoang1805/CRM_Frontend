@@ -22,7 +22,7 @@ import { DownOutlined, MoreOutlined } from '@ant-design/icons';
 import loading from '../../../utils/Loading';
 import AuthContext from '../../../context/AuthContext';
 import Client from '../../../utils/client.manager';
-import confirm_popup from '../../../utils/popup/ConfirmPopup';
+import confirm from '../../../utils/popup/ConfirmPopup';
 
 const renderEmpty = (component_name) => {
     if (component_name === 'Table.filter') {
@@ -277,7 +277,7 @@ const getActions = (task, account, user) => {
                 label: (
                     <div
                         onClick={() => {
-                            confirm_popup.showAlert(
+                            confirm.show(
                                 'Are you sure you want to delete this task? This action can not be undone.',
                                 (choose) => {
                                     if (choose) {

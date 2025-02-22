@@ -7,7 +7,7 @@ import { createStyles } from 'antd-style';
 import Client from '../../../utils/client.manager';
 import { useNavigate } from 'react-router-dom';
 import api from '../../../utils/Axios';
-import error_popup from '../../../utils/popup/ErrorPopup';
+import popup from '../../../utils/popup/Popup';
 
 const useStyle = createStyles(({ css, token }) => {
     const { antCls } = token;
@@ -181,7 +181,7 @@ const AccountImportCheck = (props) => {
                 
             } catch (err) {
                 console.log(err);
-                error_popup.show(
+                popup.error(
                     err?.response?.data?.message ||
                         err.message ||
                         'Tải lên khách hàng thất bại'

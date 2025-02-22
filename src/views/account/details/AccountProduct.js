@@ -11,7 +11,7 @@ import APDrawerForm from '../../../components/account/APDrawerForm';
 import Dropdown from 'antd/es/dropdown/dropdown';
 import { MoreOutlined } from '@ant-design/icons';
 import loading from '../../../utils/Loading';
-import confirm_popup from '../../../utils/popup/ConfirmPopup';
+import confirm from '../../../utils/popup/ConfirmPopup';
 import dayjs from 'dayjs';
 const renderEmpty = (component_name) => {
     if (component_name === 'Table.filter') {
@@ -83,7 +83,7 @@ const getActions = (product) => {
                 label: (
                     <div
                         onClick={() => {
-                            confirm_popup.showAlert(
+                            confirm.show(
                                 'Are you sure you want to delete this product? This action can not be undone.',
                                 (choose) => {
                                     if (choose) {

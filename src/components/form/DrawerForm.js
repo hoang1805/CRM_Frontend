@@ -1,7 +1,6 @@
 import React, { useRef } from 'react';
 import loading from '../../utils/Loading';
 import popup from '../../utils/popup/Popup';
-import error_popup from '../../utils/popup/ErrorPopup';
 import api from '../../utils/Axios';
 import drawer from '../../utils/Drawer';
 

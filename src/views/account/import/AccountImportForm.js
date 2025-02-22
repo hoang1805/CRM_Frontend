@@ -4,8 +4,8 @@ import React, { useState } from 'react';
 import flash from '../../../utils/Flash';
 import { Button, Collapse, List, Switch, Upload } from 'antd';
 import api from '../../../utils/Axios';
-import error_popup from '../../../utils/popup/ErrorPopup';
 import { data } from 'react-router-dom';
+import popup from '../../../utils/popup/Popup';
 
 const columns = [
     {
@@ -104,7 +104,7 @@ const AccountImportForm = (props) => {
 
                 console.log(response);
                 if (!response?.data.length) {
-                    error_popup.show('Tải lên thất bại. Không có hàng nào được tải lên');
+                    popup.error('Tải lên thất bại. Không có hàng nào được tải lên');
                     return ;
                 }
                 
@@ -119,7 +119,7 @@ const AccountImportForm = (props) => {
                 );
             } catch (err) {
                 console.log(err);
-                error_popup.show(err?.response?.data?.message || err.message || 'Tải lên thất bại');
+                popup.error(err?.response?.data?.message || err.message || 'Tải lên thất bại');
             } finally {
                 props.callback(false); // Báo hiệu kết thúc xử lý
             }

@@ -9,9 +9,9 @@ import Table from '../../components/table/Table';
 import '../../styles/views/setting/sources.scss';
 import { useNavigate } from 'react-router-dom';
 import flash from '../../utils/Flash';
-import confirm_popup from '../../utils/popup/ConfirmPopup';
-import error_popup from '../../utils/popup/ErrorPopup';
+import confirm from '../../utils/popup/ConfirmPopup';
 import loading from '../../utils/Loading';
+import popup from '../../utils/popup/Popup';
 
 const EmptyState = () => {
     return (
@@ -99,7 +99,7 @@ const getColumns = (sources, user, navigate) => {
                                 className="btn btn-circle btn-text btn-sm"
                                 aria-label="Action button"
                                 onClick={() => {
-                                    confirm_popup.showAlert('Are you sure you want to delete this source? This action can not be undone.', (choose) => {
+                                    confirm.show('Are you sure you want to delete this source? This action can not be undone.', (choose) => {
                                         if (choose) {
                                             const deleteSource = async() => {
                                                 try {
@@ -108,7 +108,7 @@ const getColumns = (sources, user, navigate) => {
                                                     flash.success('Xóa thành công!');
                                                     navigate(0);
                                                 } catch (err) {
-                                                    error_popup.show('Xóa thất bại!');
+                                                    popup.error('Xóa thất bại!');
                                                     console.error(err);
                                                 } finally {
                                                     loading.hide();

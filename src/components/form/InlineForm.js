@@ -1,10 +1,9 @@
 import React, { useRef } from 'react';
 import loading from '../../utils/Loading';
 import popup from '../../utils/popup/Popup';
-import error_popup from '../../utils/popup/ErrorPopup';
 import api from '../../utils/Axios';
 import { useNavigate } from 'react-router-dom';
-import confirm_popup from '../../utils/popup/ConfirmPopup';
+import confirm from '../../utils/popup/ConfirmPopup';
 
 const InlineForm = (props) => {
     const child_refs = useRef({});
@@ -30,7 +29,7 @@ const InlineForm = (props) => {
     };
 
     const handleCancel = () => {
-        confirm_popup.showAlert('Are you sure to cancel this page? The data may not be changed.', (choose) => {
+        confirm.show('Are you sure to cancel this page? The data may not be changed.', (choose) => {
             if (choose) {
                 navigate(-1);
             }
@@ -65,7 +64,7 @@ const InlineForm = (props) => {
                 props.callback(response.data);
             }
         } catch (err) {
-            error_popup.show(err.response.data.message || 'Đã có lỗi xảy ra');
+            popup.error(err.response.data.message || 'Đã có lỗi xảy ra');
         } finally {
             loading.hide();
         }

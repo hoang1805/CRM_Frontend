@@ -1,3 +1,4 @@
+import { Input } from 'antd';
 import React, {
     forwardRef,
     useEffect,
@@ -44,13 +45,17 @@ const InputTextarea = forwardRef((props, ref) => {
                 {props.label}
             </label>
             <div className="group-input">
-                <textarea
-                    id={props.name || ''}
-                    className="textarea"
+                <Input.TextArea
                     placeholder={props.placeholder || props.label || ''}
                     onChange={(e) => setValue(e.target.value)}
                     value={value}
-                ></textarea>
+                    allowClear
+                    showCount
+                    style={{
+                        height: 100,
+                        resize: 'none',
+                    }}
+                />
                 {error && (
                     <p className="mt-2 text-sm text-red-600 dark:text-red-500">
                         {error}

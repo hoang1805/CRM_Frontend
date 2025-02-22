@@ -5,7 +5,6 @@ import Gender from '../../utils/Gender';
 import InputSelect from '../form/inputs/InputSelect';
 import InputDate from '../form/inputs/InputDate';
 import '../../styles/components/account/account.form.scss';
-import InputUser from '../form/inputs/InputUser';
 import InputSearch from '../form/inputs/InputSearch';
 import AvatarName from '../elements/AvatarName';
 import Client from '../../utils/client.manager';
@@ -102,6 +101,7 @@ const AccountForm = (props) => {
                 <InputSearch
                     name="referrer_id"
                     label="Người giới thiệu*"
+                    placeholder='Nhập tên người giới thiệu'
                     url="/api/user/search"
                     display={(e) => <AvatarName name={e.name || ''} />}
                     object={Arr.findById(users, account?.referrerId)}
@@ -110,6 +110,7 @@ const AccountForm = (props) => {
                     name="assigned_user_id"
                     label="Người phụ trách"
                     url="/api/user/search"
+                    placeholder='Nhập tên người phụ trách'
                     display={(e) => <AvatarName name={e.name || ''} />}
                     object={Arr.findById(users, account?.assignedUserId)}
                 />

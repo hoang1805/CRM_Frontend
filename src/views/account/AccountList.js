@@ -8,10 +8,9 @@ import DateHelpers from '../../utils/Date';
 import drawer from '../../utils/Drawer';
 import AccountForm from '../../components/account/AccountForm';
 import flash from '../../utils/Flash';
-import confirm_popup from '../../utils/popup/ConfirmPopup';
+import confirm from '../../utils/popup/ConfirmPopup';
 import load from '../../utils/Loading';
 import api from '../../utils/Axios';
-import error_popup from '../../utils/popup/ErrorPopup';
 import Client from '../../utils/client.manager';
 import { useNavigate } from 'react-router-dom';
 import { createStyles } from 'antd-style';
@@ -34,6 +33,7 @@ import {
 } from '@ant-design/icons';
 import loading from '../../utils/Loading';
 import helpers from '../../utils/Helpers';
+import popup from '../../utils/popup/Popup';
 const useStyle = createStyles(({ css, token }) => {
     const { antCls } = token;
 
@@ -207,7 +207,7 @@ const getColumns = (relationships, sources, navigate, users = []) => {
                                 className="btn btn-circle btn-text btn-sm"
                                 aria-label="Action button"
                                 onClick={() => {
-                                    confirm_popup.showAlert(
+                                    confirm.show(
                                         'Are you sure you want to delete this relationship? This action can not be undone.',
                                         (choose) => {
                                             if (choose) {
@@ -224,7 +224,7 @@ const getColumns = (relationships, sources, navigate, users = []) => {
                                                             );
                                                             navigate(0);
                                                         } catch (err) {
-                                                            error_popup.show(
+                                                            popup.error(
                                                                 'Xóa thất bại!'
                                                             );
                                                             console.error(err);
@@ -512,7 +512,7 @@ const AccountList = () => {
                                     color="#233F80"
                                     className="bg-[#233F80] text-white hover:bg-[#233F80]/90"
                                     onClick={() => {
-                                        confirm_popup.showAlert('Are you sure you want to delete these accounts? This action can not be undone.', (choose) => {
+                                        confirm.show('Are you sure you want to delete these accounts? This action can not be undone.', (choose) => {
                                             if (choose) {
                                                 const deleteAccounts = async () => {
                                                     try {

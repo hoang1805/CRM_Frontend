@@ -2,8 +2,8 @@ import { Drawer, Space } from 'antd';
 import React, { useRef, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import loading from './Loading';
-import error_popup from './popup/ErrorPopup';
 import api from './Axios';
+import popup from './popup/Popup';
 
 const drawer_root =
     document.getElementById('drawer') ||
@@ -85,7 +85,7 @@ const DrawerComponent = ({ isOpen, close, ...props }) => {
 
         // if (Object.keys(data).length === 0) {
         //     loading.hide();
-        //     error_popup.show('Dữ liệu không hợp lệ');
+        //     popup.error('Dữ liệu không hợp lệ');
         //     return;
         // }
 
@@ -98,7 +98,7 @@ const DrawerComponent = ({ isOpen, close, ...props }) => {
             }
         } catch (err) {
             loading.hide();
-            error_popup.show(err.response?.data?.message || 'Đã có lỗi xảy ra');
+            popup.error(err.response?.data?.message || 'Đã có lỗi xảy ra');
         }
     };
 

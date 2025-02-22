@@ -8,13 +8,13 @@ import Table from '../../components/table/Table';
 import '../../styles/views/setting/relationships.scss';
 import { useNavigate } from 'react-router-dom';
 import flash from '../../utils/Flash';
-import confirm_popup from '../../utils/popup/ConfirmPopup';
-import error_popup from '../../utils/popup/ErrorPopup';
+import confirm from '../../utils/popup/ConfirmPopup';
 import loading from '../../utils/Loading';
 import RelationshipDrawerForm from '../../components/relationships/RelationshipDrawerForm';
 import InputColorPicker from '../../components/form/inputs/InputColorPicker';
 import DateHelpers from '../../utils/Date';
 import Client from '../../utils/client.manager';
+import popup from '../../utils/popup/Popup';
 
 const EmptyState = () => {
     return (
@@ -138,7 +138,7 @@ const getColumns = (relationships, navigate, users = [], formRef) => {
                                 className="btn btn-circle btn-text btn-sm"
                                 aria-label="Action button"
                                 onClick={() => {
-                                    confirm_popup.showAlert(
+                                    confirm.show(
                                         'Are you sure you want to delete this relationship? This action can not be undone.',
                                         (choose) => {
                                             if (choose) {
@@ -155,7 +155,7 @@ const getColumns = (relationships, navigate, users = [], formRef) => {
                                                             );
                                                             navigate(0);
                                                         } catch (err) {
-                                                            error_popup.show(
+                                                            popup.error(
                                                                 'Xóa thất bại!'
                                                             );
                                                             console.error(err);
