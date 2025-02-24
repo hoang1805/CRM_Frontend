@@ -15,28 +15,6 @@ import { Button, ConfigProvider, Dropdown, Empty, Input, Table } from 'antd';
 import { MoreOutlined } from '@ant-design/icons';
 import { createStyles } from 'antd-style';
 
-const EmptyState = () => {
-    return (
-        <div className="min-h-60 w-full flex items-center justify-center">
-            <div className="flex items-center justify-center flex-col">
-                <span className="icon-[tabler--brand-google-drive] mb-2 size-10"></span>
-                <div className="text-lg font-medium">No data to show.</div>
-            </div>
-        </div>
-    );
-};
-
-const LoadingComponent = () => {
-    return (
-        <div className="min-h-60 w-full flex items-center justify-center">
-            <div className="flex items-center justify-center flex-col">
-                <span className="loading loading-spinner loading-lg"></span>
-                <div className="text-lg font-medium">Loading</div>
-            </div>
-        </div>
-    );
-};
-
 const getColumns = (sources, navigate, pagination) => {
     return [
         {
@@ -65,6 +43,7 @@ const getColumns = (sources, navigate, pagination) => {
         },
         {
             title: '',
+            width: 30,
             render: (e) => {
                 const acl = e.acl;
                 return (
@@ -300,7 +279,7 @@ const Sources = () => {
                             }}
                             scroll={{
                                 x: 'max-content',
-                                y: 600,
+                                y: 490,
                             }}
                         />
                     </ConfigProvider>
