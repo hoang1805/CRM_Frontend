@@ -5,13 +5,15 @@ import MainContent from '../../components/page/MainContent';
 import api from '../../utils/Axios';
 import drawer from '../../utils/Drawer';
 import SourceDrawerForm from '../../components/sources/SourceDrawerForm';
-import Table from '../../components/table/Table';
 import '../../styles/views/setting/sources.scss';
 import { useNavigate } from 'react-router-dom';
 import flash from '../../utils/Flash';
 import confirm from '../../utils/popup/ConfirmPopup';
 import loading from '../../utils/Loading';
 import popup from '../../utils/popup/Popup';
+import { Button, ConfigProvider, Dropdown, Empty, Input, Table } from 'antd';
+import { MoreOutlined } from '@ant-design/icons';
+import { createStyles } from 'antd-style';
 
 const EmptyState = () => {
     return (
@@ -35,23 +37,26 @@ const LoadingComponent = () => {
     );
 };
 
-
-const getColumns = (sources, user, navigate) => {
+const getColumns = (sources, navigate, pagination) => {
     return [
         {
-            name: 'Tên nguồn khách hàng',
-            render: (e) => {
-                return e.name;
-            },
+            title: '#',
+            dataIndex: 'index',
+            width: 50,
+            render: (_, __, index) =>
+                (pagination.current - 1) * pagination.pageSize + index + 1,
         },
         {
-            name: 'Mã',
-            render: (e) => {
-                return e.code;
-            },
+            title: 'Tên nguồn khách hàng',
+            dataIndex: 'name',
         },
         {
-            name: 'Nguồn khách hàng cha',
+            title: 'Mã',
+            dataIndex: 'code',
+        },
+        {
+            title: 'Nguồn khách hàng cha',
+            width: 200,
             render: (e) => {
                 if (!e.parent_id) return '';
                 const parent = sources.find((elem) => elem.id === e.parent_id);
@@ -59,82 +64,124 @@ const getColumns = (sources, user, navigate) => {
             },
         },
         {
-            name: 'Thao tác',
+            title: '',
             render: (e) => {
                 const acl = e.acl;
                 return (
-                    <>
-                        {acl?.edit || acl?.edit == null ? (
-                            <button
-                                className="btn btn-circle btn-text btn-sm"
-                                aria-label="Action button"
-                                onClick={() => {
-                                    drawer.showForm({
-                                        title: 'Cập nhật nguồn khách hàng',
-                                        url: `/api/source/edit/${e.id}`,
-                                        callback: () => {
-                                            flash.success(
-                                                'Cập nhật thành công!'
-                                            );
-                                            navigate(0);
-                                        },
-                                        width: 500,
-                                        submit: 'Cập nhật',
-                                        content: (
-                                            <SourceDrawerForm
-                                                value={e}
-                                                sources={sources}
-                                            />
-                                        ),
-                                    });
-                                }}
-                            >
-                                <span className="icon-[tabler--pencil] size-5"></span>
-                            </button>
-                        ) : (
-                            ''
-                        )}
-                        {acl?.delete || acl?.delete == null ? (
-                            <button
-                                className="btn btn-circle btn-text btn-sm"
-                                aria-label="Action button"
-                                onClick={() => {
-                                    confirm.show('Are you sure you want to delete this source? This action can not be undone.', (choose) => {
-                                        if (choose) {
-                                            const deleteSource = async() => {
-                                                try {
-                                                    loading.show();
-                                                    const response = await api.delete(`/api/source/delete/${e.id}`);
-                                                    flash.success('Xóa thành công!');
-                                                    navigate(0);
-                                                } catch (err) {
-                                                    popup.error('Xóa thất bại!');
-                                                    console.error(err);
-                                                } finally {
-                                                    loading.hide();
+                    <Dropdown
+                        className="hover:cursor-pointer font-medium"
+                        menu={{
+                            items: [
+                                {
+                                    key: 'edit',
+                                    label: <div>Sửa</div>,
+                                    onClick: () => {
+                                        drawer.showForm({
+                                            title: 'Cập nhật nguồn khách hàng',
+                                            url: `/api/source/edit/${e.id}`,
+                                            callback: () => {
+                                                flash.success(
+                                                    'Cập nhật thành công!'
+                                                );
+                                                navigate(0);
+                                            },
+                                            width: 500,
+                                            submit: 'Cập nhật',
+                                            content: (
+                                                <SourceDrawerForm
+                                                    value={e}
+                                                    sources={sources}
+                                                />
+                                            ),
+                                        });
+                                    },
+                                    disabled: !(acl?.edit || acl?.edit == null),
+                                },
+                                {
+                                    key: 'delete',
+                                    label: <div>Xóa</div>,
+                                    disabled: !(
+                                        acl?.delete || acl?.delete == null
+                                    ),
+                                    danger: true,
+                                    onClick: () => {
+                                        confirm.show(
+                                            'Are you sure you want to delete this source? This action can not be undone.',
+                                            (choose) => {
+                                                if (choose) {
+                                                    const deleteSource =
+                                                        async () => {
+                                                            try {
+                                                                loading.show();
+                                                                const response =
+                                                                    await api.delete(
+                                                                        `/api/source/delete/${e.id}`
+                                                                    );
+                                                                flash.success(
+                                                                    'Xóa thành công!'
+                                                                );
+                                                                navigate(0);
+                                                            } catch (err) {
+                                                                popup.error(
+                                                                    'Xóa thất bại!'
+                                                                );
+                                                                console.error(
+                                                                    err
+                                                                );
+                                                            } finally {
+                                                                loading.hide();
+                                                            }
+                                                        };
+                                                    deleteSource();
                                                 }
-                                            };
-                                            deleteSource();
-                                        }
-                                    });
-                                }}
-                            >
-                                <span className="icon-[tabler--trash] size-5"></span>
-                            </button>
-                        ) : (
-                            ''
-                        )}
-                    </>
+                                            }
+                                        );
+                                    },
+                                },
+                            ],
+                        }}
+                    >
+                        <MoreOutlined />
+                    </Dropdown>
                 );
             },
         },
     ];
 };
 
+const useStyle = createStyles(({ css, token }) => {
+    const { antCls } = token;
+
+    return {
+        customTable: css`
+            .${antCls || 'ant'}-table {
+                .${antCls || 'ant'}-table-container {
+                    .${antCls || 'ant'}-table-body,
+                        .${antCls || 'ant'}-table-content {
+                        scrollbar-width: thin;
+                        scrollbar-color: #eaeaea transparent;
+                        scrollbar-gutter: stable;
+                    }
+                }
+            }
+        `,
+    };
+});
+
+const renderEmpty = (component_name) => {
+    if (component_name === 'Table.filter') {
+        return (
+            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="No data" />
+        );
+    }
+};
+
 const Sources = () => {
     const [sources, setSources] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [input, setInput] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    const { styles } = useStyle();
     const navigate = useNavigate();
     useEffect(() => {
         async function loadSources() {
@@ -158,36 +205,26 @@ const Sources = () => {
         loadSources();
     }, []);
 
-    const handleKeyDown = (event) => {
+    const loadSources = async (input) => {
         if (loading) {
-            return ;
+            return;
         }
 
-        if (event.key === 'Enter') {
-            const loadSources = async() => {
-                if (!input) {
-                    return ;
-                }
-
-                setLoading(true);
-                try {
-                    const response = await api.get(`/api/source/search?query=${input}`);
-                    const data = response.data || [];    
-                    if (Array.isArray(data)) {
-                        setSources(data);
-                    } else {
-                        setSources([]);
-                    }
-                } catch (error) {
-                    setSources([]);
-                } finally {
-                    setLoading(false);
-                }
+        setLoading(true);
+        try {
+            const response = await api.get(`/api/source/search?query=${input}`);
+            const data = response.data || [];
+            if (Array.isArray(data)) {
+                setSources(data);
+            } else {
+                setSources([]);
             }
-    
-            loadSources();
+        } catch (error) {
+            setSources([]);
+        } finally {
+            setLoading(false);
         }
-    }
+    };
 
     return (
         <div className="sources-page">
@@ -203,47 +240,70 @@ const Sources = () => {
                             <div className="text-lg font-semibold">
                                 Quản lý nguồn khách hàng
                             </div>
-                            <input
-                                type="text"
+                            <Input.Search
                                 placeholder="Tìm kiếm nguồn khách hàng"
                                 className="input w-full max-w-xs"
-                                aria-label="Tìm kiếm nguồn khách hàng"
-                                onChange={(e) => setInput(e.target.value)}
-                                value={input}
-                                onKeyDown={handleKeyDown}
+                                onSearch={loadSources}
+                                allowClear
                             />
                         </div>
-                        <button
-                            className="btn bg-[#233F80] text-white hover:bg-[#233F80]/90"
+                        <Button
+                            className=""
+                            type="primary"
                             onClick={() =>
                                 drawer.showForm({
-                                    title: "Thêm nguồn khách hàng",
-                                    url: "/api/source/create",
-                                    callback:() => {
-                                        flash.success('Thêm nguồn khách hàng thành công!');
+                                    title: 'Thêm nguồn khách hàng',
+                                    url: '/api/source/create',
+                                    callback: () => {
+                                        flash.success(
+                                            'Thêm nguồn khách hàng thành công!'
+                                        );
                                         navigate(0);
                                     },
                                     submit: 'Thêm mới',
                                     content: (
-                                        <SourceDrawerForm
-                                            sources={sources}
-                                        />
+                                        <SourceDrawerForm sources={sources} />
                                     ),
                                 })
                             }
                         >
                             Thêm mới
-                        </button>
+                        </Button>
                     </div>
-                    {loading && <LoadingComponent />}
-                    {!loading && sources.length === 0 && <EmptyState />}
-                    {!loading && sources.length !== 0 && (
+                    <ConfigProvider renderEmpty={renderEmpty}>
                         <Table
-                            className={'source-table bg-white'}
-                            columns={getColumns(sources, null, navigate)}
-                            data={sources}
+                            className={styles.customTable}
+                            columns={getColumns(sources, navigate, {
+                                current: currentPage,
+                                pageSize: pageSize,
+                            })}
+                            rowKey={(e) => e.id}
+                            bordered
+                            dataSource={sources}
+                            pagination={{
+                                showSizeChanger: true,
+                                showTotal: (total, range) =>
+                                    `${range[0]}-${range[1]} of ${total} items`,
+                                pageSizeOptions: [10, 20, 50, 100, 500],
+                                current: currentPage,
+                                pageSize: pageSize,
+                                onChange: (page, pageSize) => {
+                                    setCurrentPage(page);
+                                    setPageSize(pageSize);
+                                },
+                            }}
+                            loading={loading}
+                            locale={{
+                                emptyText: (
+                                    <Empty description="No Data"></Empty>
+                                ),
+                            }}
+                            scroll={{
+                                x: 'max-content',
+                                y: 600,
+                            }}
                         />
-                    )}
+                    </ConfigProvider>
                 </div>
             </MainContent>
         </div>

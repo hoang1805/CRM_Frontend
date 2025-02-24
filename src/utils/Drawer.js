@@ -1,4 +1,4 @@
-import { Drawer, Space } from 'antd';
+import { Button, Drawer, Space } from 'antd';
 import React, { useRef, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import loading from './Loading';
@@ -113,12 +113,12 @@ const DrawerComponent = ({ isOpen, close, ...props }) => {
             extra={
                 props.form && (
                     <Space>
-                        <button
-                            className="btn btn-primary"
+                        <Button
                             onClick={handleSubmit}
+                            type='primary'
                         >
                             {props.submit || 'Gửi'}
-                        </button>
+                        </Button>
 
                         {/* <button
                             type="button"
