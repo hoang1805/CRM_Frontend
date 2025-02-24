@@ -157,8 +157,8 @@ const AccountImportCheck = (props) => {
                 const formData = new FormData();
                 // Object options (ignore_error & allow_override)
                 const options = {
-                    ignore_error: true,
-                    allow_override: false,
+                    ignore_error: ignore_error,
+                    allow_override: override,
                 };
                 formData.append('options', JSON.stringify(options));
                 formData.append(

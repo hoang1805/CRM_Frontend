@@ -71,7 +71,6 @@ const AccountImportForm = (props) => {
         const newFile = info.fileList[0]?.originFileObj || null; // Lấy đúng File object
         setFile(newFile);
     };
-    
 
     const handleSubmit = () => {
         if (!file) {
@@ -87,10 +86,13 @@ const AccountImportForm = (props) => {
                 formData.append('file', file); // Gửi file đúng cách
 
                 // Nếu API hỗ trợ gửi thêm options, có thể append vào formData
-                formData.append('options', JSON.stringify({
-                    ignore_error: ignore_error,
-                    allow_override: override
-                }));
+                formData.append(
+                    'options',
+                    JSON.stringify({
+                        ignore_error: ignore_error,
+                        allow_override: override,
+                    })
+                );
 
                 const response = await api.post(
                     `/api/account/import/upload.file`,
@@ -104,22 +106,32 @@ const AccountImportForm = (props) => {
 
                 console.log(response);
                 if (!response?.data.length) {
-                    popup.error('Tải lên thất bại. Không có hàng nào được tải lên');
-                    return ;
+                    popup.error(
+                        'Tải lên thất bại. Không có hàng nào được tải lên'
+                    );
+                    return;
                 }
-                
+
                 flash.success('Tải lên thành công');
-                props.onUpload(
-                    {
-                        file: file,
-                        ignore_error: ignore_error,
-                        allow_override: override,
-                        list: response.data
-                    }
-                );
+                props.onUpload({
+                    file: file,
+                    ignore_error: ignore_error,
+                    allow_override: override,
+                    list: response.data,
+                });
+
+                console.log({
+                    ignore_error: ignore_error,
+                    allow_override: override,
+                    list: response.data,
+                });
             } catch (err) {
                 console.log(err);
-                popup.error(err?.response?.data?.message || err.message || 'Tải lên thất bại');
+                popup.error(
+                    err?.response?.data?.message ||
+                        err.message ||
+                        'Tải lên thất bại'
+                );
             } finally {
                 props.callback(false); // Báo hiệu kết thúc xử lý
             }
@@ -129,16 +141,15 @@ const AccountImportForm = (props) => {
     const beforeUpload = (file) => {
         const isExcel =
             file.name.endsWith('.xls') || file.name.endsWith('.xlsx');
-    
+
         if (!isExcel) {
             flash.error('Chỉ chấp nhận file .xls hoặc .xlsx!');
             return Upload.LIST_IGNORE;
         }
-    
+
         setFile(file); // Lưu đúng File object
         return false; // Không tự động upload
     };
-    
 
     const handleDownloadTemplate = async (e) => {
         e.preventDefault();
