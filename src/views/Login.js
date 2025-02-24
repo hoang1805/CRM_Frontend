@@ -64,7 +64,7 @@ const Login = () => {
                     console.error(err);
                     auth_context.logout();
                     flash.error('Đăng nhập thất bại');
-                    navigate(0);
+                    // navigate(0);
                 } finally {
                     loading.hide();
                 }

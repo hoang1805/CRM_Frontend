@@ -10,7 +10,7 @@ const api = axios.create({
 });
 
 // Danh sách API không cần CSRF
-const EXCLUDED_CSRF_URLS = ["/api/login", "/api/public"];
+const EXCLUDED_URLS = ["/api/login", "/api/public"];
 
 let authInstance = null; // Biến này sẽ lưu `logout()`
 
@@ -37,9 +37,12 @@ async function refreshCsrfToken() {
     }
 }
 
+
 // Interceptor thêm CSRF token trước request
 api.interceptors.request.use(async (config) => {
-    if (EXCLUDED_CSRF_URLS.some(url => config.url.startsWith(url))) {
+    // console.log(authInstance);
+
+    if (EXCLUDED_URLS.some(url => config.url.startsWith(url))) {
         return config;
     }
 
@@ -49,9 +52,9 @@ api.interceptors.request.use(async (config) => {
         console.log("CSRF hết hạn hoặc không có. Đang refresh...");
         csrfToken = await refreshCsrfToken();
 
-        if (!csrfToken && authInstance) {
+        if (!csrfToken) {
             console.log("Không thể lấy lại CSRF. Chuyển hướng đến đăng nhập.");
-            authInstance.logout(); // Gọi logout từ AuthContext
+            authInstance?.logout(); // Gọi logout từ AuthContext
             window.location.href = "/login";
             return Promise.reject("CSRF token hết hạn, cần đăng nhập lại.");
         }
@@ -60,5 +63,27 @@ api.interceptors.request.use(async (config) => {
     config.headers["X-XSRF-TOKEN"] = csrfToken;
     return config;
 }, (error) => Promise.reject(error));
+
+// Interceptor khi nhận response
+api.interceptors.response.use(response => response, async (error) => {
+    const originalRequest = error.config;
+    const status = error.response?.status;
+
+    
+    // Kiểm tra API có bị loại trừ không
+    const isExcluded = EXCLUDED_URLS.some(url => originalRequest.url.startsWith(url));
+
+    if ((status === 403 || status === 401) && !isExcluded) {
+        const reason = error.response?.data?.code; // Lấy code từ server (VD: "FORBIDDEN")
+        
+        if (!reason) {
+            authInstance?.logout();
+            window.location.href = "/login";
+        }
+
+    }
+
+    return Promise.reject(error);
+});
 
 export default api;

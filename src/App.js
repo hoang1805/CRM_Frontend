@@ -1,4 +1,4 @@
-import { RouterProvider, useLocation } from 'react-router-dom';
+import { RouterProvider } from 'react-router-dom';
 import router from './routes';
 import './styles/app.scss';
 import AuthContext, { AuthProvider } from './context/AuthContext';
@@ -8,16 +8,25 @@ import { useContext, useEffect } from 'react';
 import { setAuthInstance } from './utils/Axios';
 
 function App() {
+    return (
+        <AuthProvider>
+            <MainApp />
+        </AuthProvider>
+    );
+}
+
+function MainApp() {
     const auth = useContext(AuthContext);
+
     useEffect(() => {
-        setAuthInstance(auth);
+        if (auth) {
+            setAuthInstance(auth);
+        }
     }, [auth]);
+    
     return (
         <div className="App">
-            <AuthProvider>
-                <RouterProvider router={router}>
-                </RouterProvider>
-            </AuthProvider>
+            <RouterProvider router={router} />
             {loading.useLoading()}
             {drawer.useDrawer()}
         </div>
