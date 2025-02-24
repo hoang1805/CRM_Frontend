@@ -4,6 +4,7 @@ import popup from '../../utils/popup/Popup';
 import api from '../../utils/Axios';
 import { useNavigate } from 'react-router-dom';
 import confirm from '../../utils/popup/ConfirmPopup';
+import { Button } from 'antd';
 
 const InlineForm = (props) => {
     const child_refs = useRef({});
@@ -75,8 +76,8 @@ const InlineForm = (props) => {
             {props.title ? <div className='form-title'>{props.title}</div> : ""}
             <div className='form-body'>{collectRefs(props.children)}</div> 
             <div className='pt-6 actions flex flex-row gap-6 items-center justify-between'>
-                <button className="form-action form-btn-submit flex-1 btn btn-soft btn-accent" onClick={handleSubmit}>{props.submit || 'Gửi'}</button>
-                {props.cancel && <button className="form-action form-btn-cancel flex-1 btn btn-soft btn-secondary" onClick={handleCancel}>Thoát</button>}
+                <Button className="form-action form-btn-submit flex-1" type='primary' onClick={handleSubmit}>{props.submit || 'Gửi'}</Button>
+                {props.cancel && <Button className="form-action form-btn-cancel flex-1 btn btn-soft btn-secondary" color='default' variant='filled' onClick={handleCancel}>Thoát</Button>}
             </div>
         </div>
     );

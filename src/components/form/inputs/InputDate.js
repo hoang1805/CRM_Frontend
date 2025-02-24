@@ -1,4 +1,4 @@
-import React, { forwardRef, useImperativeHandle, useState } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 import Flatpickr from 'react-flatpickr';
 import "flatpickr/dist/flatpickr.min.css";
 import { DatePicker } from 'antd';
@@ -6,7 +6,7 @@ import dayjs from 'dayjs';
 import DateHelpers from '../../../utils/Date';
 
 const InputDate = forwardRef((props, ref) => {
-    const [value, setValue] = useState(props.value || DateHelpers.now());
+    const [value, setValue] = useState(props.value);
     const [error, setError] = useState('');
 
     useImperativeHandle(ref, () => ({
@@ -18,6 +18,10 @@ const InputDate = forwardRef((props, ref) => {
         }
     }));
 
+    useEffect(() => {
+        setValue(props.value);
+    }, [props.value]);
+
     const validate = () => {
         if (props.validate && typeof props.validate === 'function') {
             return props.validate(value);
@@ -26,7 +30,9 @@ const InputDate = forwardRef((props, ref) => {
     };
 
     const format_date = "DD-MM-YYYY";
-    // console.log(DateHelpers.formatDate(value, format_date));
+    console.log(props);
+    console.log(value);
+    console.log(DateHelpers.formatDate(props.value, format_date));
     return (
         <div className={`form-group input-date ${props.className || ''} ${props.compact ? 'compact' : ''}`}>
             {props.label && (

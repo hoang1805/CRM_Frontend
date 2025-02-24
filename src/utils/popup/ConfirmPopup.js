@@ -1,7 +1,7 @@
 import popup from "./Popup";
 
 const confirm = {
-    showAlert(message, callback) {
+    show(message, callback) {
         popup.warning(message, true, callback)
     },
 };
