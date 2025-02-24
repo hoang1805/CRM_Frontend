@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { useAuth } from '../context/AuthContext';
 
 const SERVER_URL = 'http://localhost:8080';
 const api = axios.create({
@@ -64,7 +63,7 @@ api.interceptors.request.use(async (config) => {
     return config;
 }, (error) => Promise.reject(error));
 
-// Interceptor khi nhận response
+// // Interceptor khi nhận response
 api.interceptors.response.use(response => response, async (error) => {
     const originalRequest = error.config;
     const status = error.response?.status;
@@ -76,7 +75,7 @@ api.interceptors.response.use(response => response, async (error) => {
     if ((status === 403 || status === 401) && !isExcluded) {
         const reason = error.response?.data?.code; // Lấy code từ server (VD: "FORBIDDEN")
         
-        if (!reason) {
+        if (!reason && authInstance && authInstance.user) {
             authInstance?.logout();
             window.location.href = "/login";
         }

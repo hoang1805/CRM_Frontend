@@ -55,7 +55,7 @@ const InputNum = forwardRef((props, ref) => {
                     onChange={(e) => setValue(e)}
                     defaultValue={0}
                     stringMode={!!props.float}
-                    step="0.001"
+                    step={props.float ? 0.01 : 1}
                     precision={props.float ? 2 : 0} // Nếu không phải float thì precision = 0
                     formatter={(value) => {
                         if (
