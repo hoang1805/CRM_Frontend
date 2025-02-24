@@ -39,9 +39,9 @@ const InputText = forwardRef((props, ref) => {
                 {props.label}
             </label>
             <div className='group-input'>
-                <Input allowClear onChange={(e) => setValue(e.target.value)} placeholder={props.placeholder || props.label} value={value} />
+                <Input allowClear onChange={(e) => setValue(e.target.value)} placeholder={props.placeholder || props.label} value={value} disabled={props.disabled}/>
                 {error && <p className="mt-2 text-sm text-red-600 dark:text-red-500">{error}</p>}
-                {props.explanation && <p className="explanation mt-2 text-sm text-gray-500 dark:text-gray-400">{props.explanation}</p>}
+                {props.explanation && <p className="explanation mt-2 text-xs text-gray-500 dark:text-gray-400">{props.explanation}</p>}
             </div>
             
         </div>

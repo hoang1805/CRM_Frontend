@@ -14,6 +14,7 @@ import { ConfigProvider, Empty, Table } from 'antd';
 import TaskStatus from './account/TaskStatus';
 import Arr from '../utils/Array';
 import Client from '../utils/client.manager';
+import { useNavigate } from 'react-router-dom';
 const renderEmpty = (component_name) => {
     if (component_name === 'Table.filter') {
         return (
@@ -119,6 +120,7 @@ const Home = () => {
     const [expired, setExpired] = useState(0);
     const [upcoming, setUpcoming] = useState([]);
     const { styles } = useStyle();
+    const navigate = useNavigate();
 
     const [users, setUsers] = useState(Client.get('users') || []);
 
@@ -187,12 +189,12 @@ const Home = () => {
                     />
                 </Section>
                 <Section title="Truy cập nhanh" className="quick-access">
-                    <button className="bg-blue-400">Tạo công việc</button>
-                    <button className="bg-green-400">
+                    <button className="bg-blue-400" onClick={() => navigate('/task')}>Danh sách công việc</button>
+                    <button className="bg-green-400" onClick={() => navigate('/account/list')}>
                         Danh sách khách hàng
                     </button>
-                    <button className="bg-teal-400">Tải lên khách hàng</button>
-                    <button className="bg-red-400">Tạo khách hàng</button>
+                    <button className="bg-teal-400" onClick={() => navigate('/account/import')}>Tải lên khách hàng</button>
+                    <button className="bg-red-400" onClick={() => navigate('/account/create')}>Tạo khách hàng</button>
                 </Section>
                 <Section
                     title="Các công việc sắp đến hạn"

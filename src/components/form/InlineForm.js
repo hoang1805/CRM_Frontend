@@ -65,7 +65,7 @@ const InlineForm = (props) => {
                 props.callback(response.data);
             }
         } catch (err) {
-            popup.error(err.response.data.message || 'Đã có lỗi xảy ra');
+            popup.error(err?.message || err?.response.data.message || 'Đã có lỗi xảy ra');
         } finally {
             loading.hide();
         }

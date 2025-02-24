@@ -22,9 +22,14 @@
 
         .report {
             .content {
-                display: grid;
-                grid-template-columns: 1fr 1fr 1fr 1fr;
+                display: flex;
+                flex-direction: row;
+                // display: grid;
+                // grid-template-columns: 1fr 1fr 1fr 1fr;
                 gap: 16px;
+                > .report-card {
+                    flex: 1;
+                }
                 .number-customer {
                     background-color: #3b82f6;
                 }
@@ -42,11 +47,14 @@
 
         .quick-access {
             .content {
-                display: grid;
-                grid-template-columns: 1fr 1fr 1fr 1fr;
+                // display: grid;
+                // grid-template-columns: 1fr 1fr 1fr 1fr;
+                display: flex;
+                flex-direction: row;
                 gap: 16px;
 
                 button {
+                    flex: 1;
                     padding: 12px 20px;
                     border-radius: 8px;
                     color: #ffffff;

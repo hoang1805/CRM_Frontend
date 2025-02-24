@@ -1,4 +1,9 @@
-import { createBrowserRouter, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import {
+    createBrowserRouter,
+    Navigate,
+    useLocation,
+    useNavigate,
+} from 'react-router-dom';
 import MainLayout from './layouts/MainLayout';
 import AuthLayout from './layouts/AuthLayout';
 import Login from './views/Login';
@@ -20,10 +25,14 @@ import Feedback from './views/public/Feedback';
 import PublicLayout from './layouts/PublicLayout';
 import TaskPage from './views/TaskPage';
 import AccountImport from './views/account/AccountImport';
+import Users from './views/setting/Users';
+import AddUser from './views/user/AddUser';
+import EditUser from './views/user/EditUser';
+import UserDetail from './views/user/UserDetail';
 
 function PrivateRoute({ element, roles = [] }) {
     const { user } = useContext(AuthContext);
-  
+
     if (!user) {
         return <Navigate to="/login" />;
     }
@@ -37,7 +46,7 @@ function PrivateRoute({ element, roles = [] }) {
     if (roles.length !== 0 && !roles.includes(user.role)) {
         flash.error('You do not have permission to access this page');
     }
-  
+
     return <Navigate to="/" />;
 }
 
@@ -46,23 +55,38 @@ const router = createBrowserRouter([
         path: '/',
         element: <MainLayout />,
         children: [
-            {path: "", element: <Navigate to='/home' />},
-            {path: "home", element: <PrivateRoute element={<Home />} />},
-            {path: "me", element: <PrivateRoute element={<Me />} />},
+            { path: '', element: <Navigate to="/home" /> },
+            { path: 'home', element: <PrivateRoute element={<Home />} /> },
+            { path: 'me', element: <PrivateRoute element={<Me />} /> },
         ],
     },
     {
         path: '/account',
         element: <MainLayout />,
         children: [
-            {path: '', element: <Navigate to='/account/list' /> },
-            {path: 'list', element: <PrivateRoute element={<AccountList />} />},
-            {path: 'create', element: <PrivateRoute element={<AddAccount />} />},
-            {path: 'edit/:id', element: <PrivateRoute element={<EditAccount />} />},
-            {path: ':id', element: <PrivateRoute element={<AccountDetail />} />},
-            {path: 'import', element: <PrivateRoute element={<AccountImport />} />},
+            { path: '', element: <Navigate to="/account/list" /> },
+            {
+                path: 'list',
+                element: <PrivateRoute element={<AccountList />} />,
+            },
+            {
+                path: 'create',
+                element: <PrivateRoute element={<AddAccount />} />,
+            },
+            {
+                path: 'edit/:id',
+                element: <PrivateRoute element={<EditAccount />} />,
+            },
+            {
+                path: ':id',
+                element: <PrivateRoute element={<AccountDetail />} />,
+            },
+            {
+                path: 'import',
+                element: <PrivateRoute element={<AccountImport />} />,
+            },
         ],
-    }, 
+    },
     {
         path: '/tasks',
         element: <MainLayout />,
@@ -74,9 +98,16 @@ const router = createBrowserRouter([
         path: '/settings',
         element: <MainLayout />,
         children: [
-            { path: '', element: <PrivateRoute element={<Settings />} />},
-            { path: 'sources', element: <PrivateRoute element={<Sources />} />},
-            { path: 'relationships', element: <PrivateRoute element={<Relationships />} />}
+            { path: '', element: <PrivateRoute element={<Settings />} /> },
+            {
+                path: 'sources',
+                element: <PrivateRoute element={<Sources />} />,
+            },
+            {
+                path: 'relationships',
+                element: <PrivateRoute element={<Relationships />} />,
+            },
+            { path: 'users', element: <PrivateRoute element={<Users />} /> },
         ],
     },
     {
@@ -85,12 +116,19 @@ const router = createBrowserRouter([
         children: [{ path: '', element: <Login /> }],
     },
     {
+        path: '/user',
+        element: <MainLayout />,
+        children: [
+            {path: ':id', element: <PrivateRoute element={<UserDetail />}/>},
+            { path: 'create', element: <PrivateRoute element={<AddUser />} /> },
+            { path: 'edit/:id', element: <PrivateRoute element={<EditUser />} />}
+        ],
+    },
+    {
         path: '/public',
         element: <PublicLayout />,
-        children: [
-            { path: 'feedback/:token', element: <Feedback /> },
-        ],
-    }
+        children: [{ path: 'feedback/:token', element: <Feedback /> }],
+    },
 ]);
 
 export default router;

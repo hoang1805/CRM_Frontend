@@ -24,7 +24,7 @@ const Settings = () => {
                             <div className='description'>Cài đặt thông tin về mối quan hệ</div>
                             <div className='button text-blue-600/100 font-medium'>Chi tiết</div>
                         </li>
-                        <li className='settings-action' onClick={() => navigate('/settings/customers')}>
+                        <li className='settings-action' onClick={() => navigate('/settings/users')}>
                             <div className='name'>Quản lý người dùng</div>
                             <div className='description'>Cài đặt thông tin về người dùng</div>
                             <div className='button text-blue-600/100 font-medium'>Chi tiết</div>

@@ -1,4 +1,5 @@
-import { Rate } from 'antd';
+import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
+import { Input } from 'antd';
 import React, {
     forwardRef,
     useEffect,
@@ -6,8 +7,7 @@ import React, {
     useState,
 } from 'react';
 
-const desc = ['terrible', 'bad', 'normal', 'good', 'wonderful'];
-const InputRating = forwardRef((props, ref) => {
+const InputPassword = forwardRef((props, ref) => {
     const [value, setValue] = useState(props.value || '');
     const [error, setError] = useState('');
 
@@ -38,7 +38,7 @@ const InputRating = forwardRef((props, ref) => {
 
     return (
         <div
-            className={`form-group input-text ${props.className || ''} ${
+            className={`form-group input-password ${props.className || ''} ${
                 props.compact ? 'compact' : ''
             }`}
         >
@@ -49,8 +49,15 @@ const InputRating = forwardRef((props, ref) => {
                 {props.label}
             </label>
             <div className="group-input">
-                <Rate tooltips={desc} onChange={setValue} value={value} starSize={props.size || 20}/>
-                {/* {value ? <span>{desc[value - 1]}</span> : null} */}
+                <Input.Password
+                    iconRender={(visible) =>
+                        visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
+                    }
+                    onChange={(e) => setValue(e.target.value)}
+                    placeholder={props.placeholder || props.label}
+                    value={value}
+                    disabled={props.disabled}   
+                />
                 {error && (
                     <p className="mt-2 text-sm text-red-600 dark:text-red-500">
                         {error}
@@ -66,4 +73,4 @@ const InputRating = forwardRef((props, ref) => {
     );
 });
 
-export default InputRating;
+export default InputPassword;
