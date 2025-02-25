@@ -1,6 +1,5 @@
+import { Input } from 'antd';
 import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
-
-const types = ['text', 'number', 'email', 'password'];
 
 const InputText = forwardRef((props, ref) => {
     const [value, setValue] = useState(props.value || '');
@@ -31,8 +30,6 @@ const InputText = forwardRef((props, ref) => {
         setError('');
     }, [props.value])
 
-    const type = types.includes(props.type || '') ? props.type : 'text';
-
     return (
         <div className={`form-group input-text ${props.className || ''} ${props.compact ? 'compact' : ''}`}>
             <label 
@@ -42,16 +39,9 @@ const InputText = forwardRef((props, ref) => {
                 {props.label}
             </label>
             <div className='group-input'>
-                <input 
-                    id={props.name || ''} 
-                    type={type} 
-                    value={value} 
-                    className={`input`}
-                    onChange={(e) => setValue(e.target.value)}
-                    placeholder={props.placeholder || props.label || ''}
-                />
+                <Input allowClear onChange={(e) => setValue(e.target.value)} placeholder={props.placeholder || props.label} value={value} disabled={props.disabled}/>
                 {error && <p className="mt-2 text-sm text-red-600 dark:text-red-500">{error}</p>}
-                {props.explanation && <p className="explanation mt-2 text-sm text-gray-500 dark:text-gray-400">{props.explanation}</p>}
+                {props.explanation && <p className="explanation mt-2 text-xs text-gray-500 dark:text-gray-400">{props.explanation}</p>}
             </div>
             
         </div>

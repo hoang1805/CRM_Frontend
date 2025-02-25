@@ -1,9 +1,10 @@
 import { createPortal } from 'react-dom';
 import { useState, useEffect } from 'react';
+import { Spin } from 'antd';
+import { LoadingOutlined } from '@ant-design/icons';
 
 // Đảm bảo thẻ div#loading tồn tại trong DOM
 const loading_root =
-    
     document.getElementById('loading') ||
     (() => {
         const div = document.createElement('div');
@@ -16,9 +17,18 @@ const loading_root =
 const LoadingComponent = ({ isLoading }) => {
     if (!isLoading) return null;
     return createPortal(
-        <div className="loading-overlay" style={{'zIndex': 1000}}>
-            <div className="loading-spinner"></div>
-        </div>,
+        <Spin
+            fullscreen
+            indicator={
+                <LoadingOutlined
+                    style={{
+                        fontSize: 48,
+                    }}
+                    spin
+                />
+            }
+            className='z-[100000]'
+        />,
         loading_root
     );
 };

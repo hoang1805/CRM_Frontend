@@ -1,6 +1,5 @@
 import React from 'react';
 import '../../styles/components/reports/report.card.scss';
-import Tooltip from '../elements/Tooltip';
 const ReportCard = (props) => {
     return (
         <div className={`report-card ${props.className || ''}`}>

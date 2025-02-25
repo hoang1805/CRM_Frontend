@@ -14,7 +14,7 @@ const items = [
         {name: "Thêm mới khách hàng", path: '/account/create'},
         {name: "Tải lên khách hàng", path: '/account/import'}
     ]},
-    {name: "Công việc", icon: <CgWorkAlt className='item-icon' />, path: '/task'},
+    {name: "Công việc", icon: <CgWorkAlt className='item-icon' />, path: '/tasks'},
     {name: "Báo cáo", icon: <IoDocumentTextOutline className='item-icon' />, path: '/report'}
 ];
 

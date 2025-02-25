@@ -1,25 +1,33 @@
-import { RouterProvider, useLocation } from 'react-router-dom';
+import { RouterProvider } from 'react-router-dom';
 import router from './routes';
 import './styles/app.scss';
-import { AuthProvider } from './context/AuthContext';
+import AuthContext, { AuthProvider } from './context/AuthContext';
 import loading from './utils/Loading';
-import popup from './utils/popup/Popup';
-import { useEffect } from 'react';
-import FlyonInitializer from './components/FlyonInitializer';
-import flash from './utils/Flash';
 import drawer from './utils/Drawer';
+import { useContext, useEffect } from 'react';
+import { setAuthInstance } from './utils/Axios';
 
 function App() {
     return (
+        <AuthProvider>
+            <MainApp />
+        </AuthProvider>
+    );
+}
+
+function MainApp() {
+    const auth = useContext(AuthContext);
+
+    useEffect(() => {
+        if (auth) {
+            setAuthInstance(auth);
+        }
+    }, [auth]);
+    
+    return (
         <div className="App">
-            <AuthProvider>
-                <RouterProvider router={router}>
-                    <FlyonInitializer />
-                </RouterProvider>
-            </AuthProvider>
+            <RouterProvider router={router} />
             {loading.useLoading()}
-            {popup.usePopup()}
-            {flash.useFlash()}
             {drawer.useDrawer()}
         </div>
     );

@@ -75,7 +75,7 @@ const InputColorPicker = forwardRef((props, ref) => {
                 />
                 
                 {props.explanation && (
-                    <p className="explanation mt-2 text-sm text-gray-500 dark:text-gray-400">
+                    <p className="explanation mt-2 text-xs text-gray-500 dark:text-gray-400">
                         {props.explanation}
                     </p>
                 )}

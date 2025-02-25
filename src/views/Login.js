@@ -1,13 +1,11 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import loading from '../utils/Loading';
-import error_popup from '../utils/popup/ErrorPopup';
 import api from '../utils/Axios';
-import popup from '../utils/popup/Popup';
 import '../styles/views/login.scss';
 import AuthContext from '../context/AuthContext';
 import flash from '../utils/Flash';
-import load from '../utils/Loader';
+import popup from '../utils/popup/Popup';
 
 const Login = () => {
     const [username, setUsername] = useState('');
@@ -24,7 +22,7 @@ const Login = () => {
 
         // Kiểm tra validation
         if (!username || !password) {
-            error_popup.show("Username or password is empty. Please try again.");
+            popup.error("Username or password is empty. Please try again.");
             loading.hide();
             return;
         }
@@ -38,7 +36,7 @@ const Login = () => {
             flash.success('Login successful');
             navigate('/home');
         } catch (error) {
-            error_popup.show(error.response?.data?.message || error.message || 'Có lỗi xảy ra');
+            popup.error(error.response?.data?.message || error.message || 'Có lỗi xảy ra');
         } finally {
             loading.hide();
         }
@@ -66,14 +64,14 @@ const Login = () => {
                     console.error(err);
                     auth_context.logout();
                     flash.error('Đăng nhập thất bại');
-                    navigate(0);
+                    // navigate(0);
                 } finally {
                     loading.hide();
                 }
                 
             })();
         }
-    })
+    }, [])
 
 
     return (

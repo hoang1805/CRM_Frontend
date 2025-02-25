@@ -1,53 +1,67 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Header from '../../components/page/Header';
 import { RiSettings3Fill } from 'react-icons/ri';
 import MainContent from '../../components/page/MainContent';
 import api from '../../utils/Axios';
 import drawer from '../../utils/Drawer';
-import Table from '../../components/table/Table';
 import '../../styles/views/setting/relationships.scss';
 import { useNavigate } from 'react-router-dom';
 import flash from '../../utils/Flash';
-import confirm_popup from '../../utils/popup/ConfirmPopup';
-import error_popup from '../../utils/popup/ErrorPopup';
+import confirm from '../../utils/popup/ConfirmPopup';
 import loading from '../../utils/Loading';
-import RelationshipForm from '../../components/relationships/RelationshipForm';
+import RelationshipDrawerForm from '../../components/relationships/RelationshipDrawerForm';
 import InputColorPicker from '../../components/form/inputs/InputColorPicker';
 import DateHelpers from '../../utils/Date';
 import Client from '../../utils/client.manager';
+import popup from '../../utils/popup/Popup';
+import { MoreOutlined } from '@ant-design/icons';
+import { Button, ConfigProvider, Dropdown, Empty, Table } from 'antd';
+import { createStyles } from 'antd-style';
 
-const EmptyState = () => {
-    return (
-        <div className="min-h-60 w-full flex items-center justify-center">
-            <div className="flex items-center justify-center flex-col">
-                <span className="icon-[tabler--brand-google-drive] mb-2 size-10"></span>
-                <div className="text-lg font-medium">No data to show.</div>
-            </div>
-        </div>
-    );
+const useStyle = createStyles(({ css, token }) => {
+    const { antCls } = token;
+
+    return {
+        customTable: css`
+            .${antCls || 'ant'}-table {
+                .${antCls || 'ant'}-table-container {
+                    .${antCls || 'ant'}-table-body,
+                        .${antCls || 'ant'}-table-content {
+                        scrollbar-width: thin;
+                        scrollbar-color: #eaeaea transparent;
+                        scrollbar-gutter: stable;
+                    }
+                }
+            }
+        `,
+    };
+});
+
+const renderEmpty = (component_name) => {
+    if (component_name === 'Table.filter') {
+        return (
+            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="No data" />
+        );
+    }
 };
 
-const LoadingComponent = () => {
-    return (
-        <div className="min-h-60 w-full flex items-center justify-center">
-            <div className="flex items-center justify-center flex-col">
-                <span className="loading loading-spinner loading-lg"></span>
-                <div className="text-lg font-medium">Loading</div>
-            </div>
-        </div>
-    );
-};
-
-const getColumns = (relationships, navigate, users = []) => {
+const getColumns = (relationships, navigate, users = [], pagination) => {
     return [
         {
-            name: 'Tên mối quan hệ',
+            title: '#',
+            dataIndex: 'index',
+            width: 50,
+            render: (_, __, index) =>
+                (pagination.current - 1) * pagination.pageSize + index + 1,
+        },
+        {
+            title: 'Tên mối quan hệ',
             render: (e) => {
                 return e.name;
             },
         },
         {
-            name: 'Màu mối quan hệ',
+            title: 'Màu mối quan hệ',
             render: (e) => {
                 return (
                     <InputColorPicker
@@ -70,18 +84,19 @@ const getColumns = (relationships, navigate, users = []) => {
             },
         },
         {
-            name: 'Mô tả',
+            title: 'Mô tả',
             render: (e) => {
                 return e.description;
             },
-            style: {
-                maxWidth: '250px',
-            }
+            width: 250,
         },
         {
-            name: 'Người tạo / Ngày tạo',
+            title: 'Người tạo / Ngày tạo',
+            width: 200,
             render: (e) => {
-                const user = users.find((u) => u.id === e.creatorId || u.id === e.creator_id);
+                const user = users.find(
+                    (u) => u.id === e.creatorId || u.id === e.creator_id
+                );
                 return (
                     <div>
                         <div>{user?.name || 'Không có dữ liệu'}</div>
@@ -96,82 +111,86 @@ const getColumns = (relationships, navigate, users = []) => {
             },
         },
         {
-            name: 'Thao tác',
+            title: '',
+            width: 30,
             render: (e) => {
                 const acl = e.acl;
                 return (
-                    <>
-                        {acl?.edit || acl?.edit == null ? (
-                            <button
-                                className="btn btn-circle btn-text btn-sm"
-                                aria-label="Action button"
-                                onClick={() => {
-                                    drawer.show({
-                                        content: (
-                                            <RelationshipForm
-                                                url={`/api/relationship/edit/${e.id}`}
-                                                title="Cập nhật mối quan hệ"
-                                                value={e}
-                                                submit="Cập nhật"
-                                                relationships={relationships}
-                                                callback={() => {
-                                                    flash.success(
-                                                        'Cập nhật thành công!'
-                                                    );
-                                                    navigate(0);
-                                                }}
-                                            />
-                                        ),
-                                    });
-                                }}
-                            >
-                                <span className="icon-[tabler--pencil] size-5"></span>
-                            </button>
-                        ) : (
-                            ''
-                        )}
-                        {acl?.delete || acl?.delete == null ? (
-                            <button
-                                className="btn btn-circle btn-text btn-sm"
-                                aria-label="Action button"
-                                onClick={() => {
-                                    confirm_popup.showAlert(
-                                        'Are you sure you want to delete this relationship? This action can not be undone.',
-                                        (choose) => {
-                                            if (choose) {
-                                                const deleteRelationship =
-                                                    async () => {
-                                                        try {
-                                                            loading.show();
-                                                            const response =
-                                                                await api.delete(
-                                                                    `/api/relationship/delete/${e.id}`
+                    <Dropdown
+                        className="hover:cursor-pointer font-medium"
+                        menu={{
+                            items: [
+                                {
+                                    key: 'edit',
+                                    label: <div>Sửa</div>,
+                                    onClick: () => {
+                                        drawer.showForm({
+                                            title: 'Cập nhật mối quan hệ',
+                                            url: `/api/relationship/edit/${e.id}`,
+                                            callback: () => {
+                                                flash.success(
+                                                    'Cập nhật thành công!'
+                                                );
+                                                navigate(0);
+                                            },
+                                            width: 500,
+                                            submit: 'Cập nhật',
+                                            content: (
+                                                <RelationshipDrawerForm
+                                                    value={e}
+                                                    submit="Cập nhật"
+                                                />
+                                            ),
+                                        });
+                                    },
+                                    disabled: !(acl?.edit || acl?.edit == null),
+                                },
+                                {
+                                    key: 'delete',
+                                    label: <div>Xóa</div>,
+                                    disabled: !(
+                                        acl?.delete || acl?.delete == null
+                                    ),
+                                    danger: true,
+                                    onClick: () => {
+                                        confirm.show(
+                                            'Are you sure you want to delete this relationship? This action can not be undone.',
+                                            (choose) => {
+                                                if (choose) {
+                                                    const deleteRelationship =
+                                                        async () => {
+                                                            try {
+                                                                loading.show();
+                                                                const response =
+                                                                    await api.delete(
+                                                                        `/api/relationship/delete/${e.id}`
+                                                                    );
+                                                                flash.success(
+                                                                    'Xóa thành công!'
                                                                 );
-                                                            flash.success(
-                                                                'Xóa thành công!'
-                                                            );
-                                                            navigate(0);
-                                                        } catch (err) {
-                                                            error_popup.show(
-                                                                'Xóa thất bại!'
-                                                            );
-                                                            console.error(err);
-                                                        } finally {
-                                                            loading.hide();
-                                                        }
-                                                    };
-                                                deleteRelationship();
+                                                                navigate(0);
+                                                            } catch (err) {
+                                                                popup.error(
+                                                                    'Xóa thất bại!'
+                                                                );
+                                                                console.error(
+                                                                    err
+                                                                );
+                                                            } finally {
+                                                                loading.hide();
+                                                            }
+                                                        };
+                                                    deleteRelationship();
+                                                }
                                             }
-                                        }
-                                    );
-                                }}
-                            >
-                                <span className="icon-[tabler--trash] size-5"></span>
-                            </button>
-                        ) : (
-                            ''
-                        )}
-                    </>
+                                        );
+                                    },
+                                },
+                            ],
+                        }}
+                    >
+                        <MoreOutlined />
+                    </Dropdown>
                 );
             },
         },
@@ -179,8 +198,12 @@ const getColumns = (relationships, navigate, users = []) => {
 };
 
 const Relationships = () => {
+    const formRef = useRef({});
     const [relationships, setRelationships] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    const { styles } = useStyle();
     const navigate = useNavigate();
     const [users, setUsers] = useState(Client.get('users'));
 
@@ -191,7 +214,7 @@ const Relationships = () => {
 
         return () => unsubscribe();
     }, []);
-    
+
     useEffect(() => {
         async function loadRelationships() {
             setLoading(true);
@@ -229,39 +252,64 @@ const Relationships = () => {
                                 Quản lý mối quan hệ
                             </div>
                         </div>
-                        <button
-                            className="btn bg-[#233F80] text-white hover:bg-[#233F80]/90"
-                            onClick={() =>
-                                drawer.show({
-                                    content: (
-                                        <RelationshipForm
-                                            url="/api/relationship/create"
-                                            title="Thêm mối quan hệ"
-                                            relationships={relationships}
-                                            submit="Thêm mới"
-                                            callback={() => {
-                                                flash.success(
-                                                    'Thêm mối quan hệ thành công!'
-                                                );
-                                                navigate(0);
-                                            }}
-                                        />
-                                    ),
-                                })
-                            }
+                        <Button
+                            type="primary"
+                            onClick={() => {
+                                drawer.showForm({
+                                    title: 'Thêm mối quan hệ',
+                                    url: `/api/relationship/create`,
+                                    callback: () => {
+                                        flash.success('Thêm thành công!');
+                                        navigate(0);
+                                    },
+                                    width: 500,
+                                    submit: 'Thêm',
+                                    content: <RelationshipDrawerForm />,
+                                });
+                            }}
                         >
                             Thêm mới
-                        </button>
+                        </Button>
                     </div>
-                    {loading && <LoadingComponent />}
-                    {!loading && relationships.length === 0 && <EmptyState />}
-                    {!loading && relationships.length !== 0 && (
+                    <ConfigProvider renderEmpty={renderEmpty}>
                         <Table
-                            className={'relationship-table bg-white'}
-                            columns={getColumns(relationships, navigate, users)}
-                            data={relationships}
+                            className={styles.customTable}
+                            columns={getColumns(
+                                relationships,
+                                navigate,
+                                users,
+                                {
+                                    current: currentPage,
+                                    pageSize: pageSize,
+                                }
+                            )}
+                            rowKey={(e) => e.id}
+                            bordered
+                            dataSource={relationships}
+                            pagination={{
+                                showSizeChanger: true,
+                                showTotal: (total, range) =>
+                                    `${range[0]}-${range[1]} of ${total} items`,
+                                pageSizeOptions: [10, 20, 50, 100, 500],
+                                current: currentPage,
+                                pageSize: pageSize,
+                                onChange: (page, pageSize) => {
+                                    setCurrentPage(page);
+                                    setPageSize(pageSize);
+                                },
+                            }}
+                            loading={loading}
+                            locale={{
+                                emptyText: (
+                                    <Empty description="No Data"></Empty>
+                                ),
+                            }}
+                            scroll={{
+                                x: 'max-content',
+                                y: 490,
+                            }}
                         />
-                    )}
+                    </ConfigProvider>
                 </div>
             </MainContent>
         </div>

@@ -1,19 +1,26 @@
-import React, { forwardRef, useImperativeHandle, useState } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 import Flatpickr from 'react-flatpickr';
 import "flatpickr/dist/flatpickr.min.css";
+import { DatePicker } from 'antd';
+import dayjs from 'dayjs';
+import DateHelpers from '../../../utils/Date';
 
 const InputDate = forwardRef((props, ref) => {
-    const [value, setValue] = useState(props.value || new Date());
+    const [value, setValue] = useState(props.value);
     const [error, setError] = useState('');
 
     useImperativeHandle(ref, () => ({
-        getData: () => ({ key: props.name, value: value?.getTime() || null }),
+        getData: () => ({ key: props.name, value: value }),
         validate,
         resetData:() => {
-            setValue(props.value || new Date());
+            setValue(props.value || DateHelpers.now());
             setError('')
         }
     }));
+
+    useEffect(() => {
+        setValue(props.value);
+    }, [props.value]);
 
     const validate = () => {
         if (props.validate && typeof props.validate === 'function') {
@@ -22,6 +29,10 @@ const InputDate = forwardRef((props, ref) => {
         return ''; // Tránh trả về undefined
     };
 
+    const format_date = "DD-MM-YYYY";
+    console.log(props);
+    console.log(value);
+    console.log(DateHelpers.formatDate(props.value, format_date));
     return (
         <div className={`form-group input-date ${props.className || ''} ${props.compact ? 'compact' : ''}`}>
             {props.label && (
@@ -33,14 +44,13 @@ const InputDate = forwardRef((props, ref) => {
                 </label>
             )}
             <div className='group-input'>
-                <Flatpickr
-                    value={value} // Giá trị ngày ban đầu
-                    onChange={(e) => setValue(e[0])} // Callback khi chọn ngày
-                    options={{
-                        dateFormat: 'd-m-Y', // Định dạng ngày tháng (YYYY-MM-DD)
-                        enableTime: false, // Nếu muốn có cả giờ thì đặt true
+                <DatePicker 
+                    style={{width: '100%'}}
+                    format={format_date}
+                    onChange={(val, date_string) => {
+                        setValue(+dayjs(date_string, format_date));
                     }}
-                    className="input"
+                    value={value? dayjs(DateHelpers.formatDate(value, format_date), format_date) : null}
                 />
                 {error && (
                     <p className="mt-2 text-sm text-red-600 dark:text-red-500">
@@ -48,7 +58,7 @@ const InputDate = forwardRef((props, ref) => {
                     </p>
                 )}
                 {props.explanation && (
-                    <p className="explanation mt-2 text-sm text-gray-500 dark:text-gray-400">
+                    <p className="explanation mt-2 text-xs text-gray-500 dark:text-gray-400">
                         {props.explanation}
                     </p>
                 )}

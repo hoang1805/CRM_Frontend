@@ -8,16 +8,16 @@ import DateHelpers from '../../utils/Date';
 import drawer from '../../utils/Drawer';
 import AccountForm from '../../components/account/AccountForm';
 import flash from '../../utils/Flash';
-import confirm_popup from '../../utils/popup/ConfirmPopup';
+import confirm from '../../utils/popup/ConfirmPopup';
 import load from '../../utils/Loading';
 import api from '../../utils/Axios';
-import error_popup from '../../utils/popup/ErrorPopup';
 import Client from '../../utils/client.manager';
 import { useNavigate } from 'react-router-dom';
 import { createStyles } from 'antd-style';
 import {
     Button,
     ConfigProvider,
+    Dropdown,
     Empty,
     Input,
     Table,
@@ -27,12 +27,15 @@ import {
 import {
     DeleteOutlined,
     LeftOutlined,
+    MoreOutlined,
     RightOutlined,
     UserOutlined,
     VerticalAlignBottomOutlined,
     VerticalAlignTopOutlined,
 } from '@ant-design/icons';
 import loading from '../../utils/Loading';
+import helpers from '../../utils/Helpers';
+import popup from '../../utils/popup/Popup';
 const useStyle = createStyles(({ css, token }) => {
     const { antCls } = token;
 
@@ -68,6 +71,9 @@ const getColumns = (relationships, sources, navigate, users = []) => {
             width: 150,
             fixed: 'left',
             ellipsis: true,
+            render: (text, e) => {
+                return <a href={`/account/${e.id}`}>{text}</a>;
+            },
         },
         {
             title: 'Mã KH',
@@ -177,69 +183,71 @@ const getColumns = (relationships, sources, navigate, users = []) => {
             },
         },
         {
-            title: 'Thao tác',
+            title: '',
             key: 'operation',
             fixed: 'right',
-            width: 100,
+            width: 40,
             render: (e) => {
                 const acl = e.acl;
-                console.log(e);
                 return (
-                    <>
-                        
-                        <button
-                            className="btn btn-circle btn-text btn-sm"
-                            aria-label="Action button"
-                            disabled={!(acl?.edit || acl?.edit == null)}
-                            onClick={() => {
-                                navigate(`/account/edit/${e.id}`);
-                            }}
-                        >
-                            <span className="icon-[tabler--pencil] size-5"></span>
-                        </button>
-                        
-                        {acl?.delete || acl?.delete == null ? (
-                            <button
-                                className="btn btn-circle btn-text btn-sm"
-                                aria-label="Action button"
-                                onClick={() => {
-                                    confirm_popup.showAlert(
-                                        'Are you sure you want to delete this relationship? This action can not be undone.',
-                                        (choose) => {
-                                            if (choose) {
-                                                const deleteRelationship =
-                                                    async () => {
-                                                        try {
-                                                            load.show();
-                                                            const response =
-                                                                await api.delete(
-                                                                    `/api/account/delete/${e.id}`
+                    <Dropdown
+                        className="hover:cursor-pointer font-medium"
+                        menu={{
+                            items: [
+                                {
+                                    key: 'edit',
+                                    label: <div>Sửa</div>,
+                                    onClick: () => {
+                                        navigate(`/account/edit/${e.id}`);
+                                    },
+                                    disabled: !(acl?.edit || acl?.edit == null),
+                                },
+                                {
+                                    key: 'delete',
+                                    label: <div>Xóa</div>,
+                                    onClick: () => {
+                                        confirm.show(
+                                            'Are you sure you want to delete this relationship? This action can not be undone.',
+                                            (choose) => {
+                                                if (choose) {
+                                                    const deleteRelationship =
+                                                        async () => {
+                                                            try {
+                                                                load.show();
+                                                                const response =
+                                                                    await api.delete(
+                                                                        `/api/account/delete/${e.id}`
+                                                                    );
+                                                                flash.success(
+                                                                    'Xóa thành công!'
                                                                 );
-                                                            flash.success(
-                                                                'Xóa thành công!'
-                                                            );
-                                                            navigate(0);
-                                                        } catch (err) {
-                                                            error_popup.show(
-                                                                'Xóa thất bại!'
-                                                            );
-                                                            console.error(err);
-                                                        } finally {
-                                                            load.hide();
-                                                        }
-                                                    };
-                                                deleteRelationship();
+                                                                navigate(0);
+                                                            } catch (err) {
+                                                                popup.error(
+                                                                    'Xóa thất bại!'
+                                                                );
+                                                                console.error(
+                                                                    err
+                                                                );
+                                                            } finally {
+                                                                load.hide();
+                                                            }
+                                                        };
+                                                    deleteRelationship();
+                                                }
                                             }
-                                        }
-                                    );
-                                }}
-                            >
-                                <span className="icon-[tabler--trash] size-5"></span>
-                            </button>
-                        ) : (
-                            ''
-                        )}
-                    </>
+                                        );
+                                    },
+                                    disabled: !(
+                                        acl?.delete || acl?.delete == null
+                                    ),
+                                    danger: true,
+                                },
+                            ],
+                        }}
+                    >
+                        <MoreOutlined />
+                    </Dropdown>
                 );
             },
         },
@@ -402,8 +410,6 @@ const AccountList = () => {
         }
     };
 
-    console.log(relationships);
-
     return (
         <div className="account-list-page">
             <Header
@@ -499,8 +505,10 @@ const AccountList = () => {
                             />
                         </div>
                         <div className="quick-actions flex flex-row gap-2 items-center">
-                            <div className='text-sm'>
-                                {hasSelected ? `Selected ${selectedRowKeys.length} items` : null}
+                            <div className="text-sm">
+                                {hasSelected
+                                    ? `Selected ${selectedRowKeys.length} items`
+                                    : null}
                             </div>
                             <Tooltip
                                 placement="top"
@@ -512,32 +520,43 @@ const AccountList = () => {
                                     color="#233F80"
                                     className="bg-[#233F80] text-white hover:bg-[#233F80]/90"
                                     onClick={() => {
-                                        confirm_popup.showAlert('Are you sure you want to delete these accounts? This action can not be undone.', (choose) => {
-                                            if (choose) {
-                                                const deleteAccounts = async () => {
-                                                    try {
-                                                        loading.show();
-                                                        const response = await api.delete(
-                                                            '/api/account/delete.many',
-                                                            {
-                                                                data: selectedRowKeys,
+                                        confirm.show(
+                                            'Are you sure you want to delete these accounts? This action can not be undone.',
+                                            (choose) => {
+                                                if (choose) {
+                                                    const deleteAccounts =
+                                                        async () => {
+                                                            try {
+                                                                loading.show();
+                                                                const response =
+                                                                    await api.delete(
+                                                                        '/api/account/delete.many',
+                                                                        {
+                                                                            data: selectedRowKeys,
+                                                                        }
+                                                                    );
+                                                                flash.success(
+                                                                    'Xóa thành công!'
+                                                                );
+                                                                setSelectedRowKeys(
+                                                                    []
+                                                                );
+                                                                navigate(0);
+                                                            } catch (err) {
+                                                                console.error(
+                                                                    err
+                                                                );
+                                                            } finally {
+                                                                loading.hide();
                                                             }
-                                                        );
-                                                        flash.success('Xóa thành công!');
-                                                        setSelectedRowKeys([]);
-                                                        navigate(0);
-                                                    } catch (err) {
-                                                        console.error(err);
-                                                    } finally {
-                                                        loading.hide();
-                                                    }
-                                                };
-                                                deleteAccounts();
+                                                        };
+                                                    deleteAccounts();
+                                                }
                                             }
-                                        })
+                                        );
                                     }}
                                 >
-                                    <DeleteOutlined 
+                                    <DeleteOutlined
                                         style={{ fontSize: '22px' }}
                                     />
                                 </Button>
@@ -548,8 +567,60 @@ const AccountList = () => {
                                 arrow={false}
                             >
                                 <Button
+                                    disabled={!hasSelected}
                                     color="#233F80"
                                     className="bg-[#233F80] text-white hover:bg-[#233F80]/90"
+                                    onClick={async () => {
+                                        try {
+                                            loading.show();
+                                            const response = await api.post(
+                                                '/api/account/export',
+                                                selectedRowKeys,
+                                                { responseType: 'blob' }
+                                            );
+                                            console.log(response);
+
+                                            const disposition =
+                                                response.headers[
+                                                    'content-disposition'
+                                                ];
+                                            let fileName = 'export.xlsx'; // Đặt mặc định
+                                            if (disposition) {
+                                                const match =
+                                                    disposition.match(
+                                                        /filename="?(.+?)"?$/
+                                                    );
+                                                if (match) fileName = match[1];
+                                            }
+
+                                            // console.log(response);
+
+                                            // Tạo URL để tải xuống file
+                                            const url =
+                                                window.URL.createObjectURL(
+                                                    new Blob([response.data])
+                                                );
+                                            const link =
+                                                document.createElement('a');
+                                            link.href = url;
+                                            link.setAttribute(
+                                                'download',
+                                                fileName
+                                            );
+                                            document.body.appendChild(link);
+                                            link.click();
+                                            link.remove();
+                                            window.URL.revokeObjectURL(url);
+                                            flash.success(
+                                                'Tải xuống thành công'
+                                            );
+                                        } catch (err) {
+                                            console.log(err);
+                                            flash.error('Tải xuống thất bại');
+                                        } finally {
+                                            loading.hide();
+                                        }
+                                    }}
                                 >
                                     <VerticalAlignBottomOutlined
                                         style={{ fontSize: '22px' }}
@@ -564,6 +635,7 @@ const AccountList = () => {
                                 <Button
                                     color="#233F80"
                                     className="bg-[#233F80] text-white hover:bg-[#233F80]/90"
+                                    onClick={() => navigate('/account/import')}
                                 >
                                     <VerticalAlignTopOutlined
                                         style={{ fontSize: '22px' }}
@@ -598,9 +670,7 @@ const AccountList = () => {
                                     showSizeChanger: true,
                                     showTotal: (total, range) =>
                                         `${range[0]}-${range[1]} of ${total} items`,
-                                    pageSizeOptions: [
-                                        10, 20, 50, 100, 500, 1000, 5000,
-                                    ],
+                                    pageSizeOptions: [10, 20, 50, 100, 500],
                                 }}
                                 loading={load}
                                 onChange={handleTableChange}

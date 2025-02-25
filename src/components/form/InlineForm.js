@@ -1,10 +1,10 @@
 import React, { useRef } from 'react';
 import loading from '../../utils/Loading';
 import popup from '../../utils/popup/Popup';
-import error_popup from '../../utils/popup/ErrorPopup';
 import api from '../../utils/Axios';
 import { useNavigate } from 'react-router-dom';
-import confirm_popup from '../../utils/popup/ConfirmPopup';
+import confirm from '../../utils/popup/ConfirmPopup';
+import { Button } from 'antd';
 
 const InlineForm = (props) => {
     const child_refs = useRef({});
@@ -30,7 +30,7 @@ const InlineForm = (props) => {
     };
 
     const handleCancel = () => {
-        confirm_popup.showAlert('Are you sure to cancel this page? The data may not be changed.', (choose) => {
+        confirm.show('Are you sure to cancel this page? The data may not be changed.', (choose) => {
             if (choose) {
                 navigate(-1);
             }
@@ -44,7 +44,11 @@ const InlineForm = (props) => {
         }
         loading.show();
         
-        const data = {};
+        let data = {};
+        if (props.extras_data) {
+            data = {...props.extras_data, ...data };
+        }
+        
         for (const key in child_refs.current) {
             if (child_refs.current[key] && typeof child_refs.current[key].getData === 'function') 
                 {
@@ -61,7 +65,7 @@ const InlineForm = (props) => {
                 props.callback(response.data);
             }
         } catch (err) {
-            error_popup.show(err.response.data.message || 'Đã có lỗi xảy ra');
+            popup.error(err?.message || err?.response.data.message || 'Đã có lỗi xảy ra');
         } finally {
             loading.hide();
         }
@@ -72,8 +76,8 @@ const InlineForm = (props) => {
             {props.title ? <div className='form-title'>{props.title}</div> : ""}
             <div className='form-body'>{collectRefs(props.children)}</div> 
             <div className='pt-6 actions flex flex-row gap-6 items-center justify-between'>
-                <button className="form-action form-btn-submit flex-1 btn btn-soft btn-accent" onClick={handleSubmit}>{props.submit || 'Gửi'}</button>
-                {props.cancel && <button className="form-action form-btn-cancel flex-1 btn btn-soft btn-secondary" onClick={handleCancel}>Thoát</button>}
+                <Button className="form-action form-btn-submit flex-1" type='primary' onClick={handleSubmit}>{props.submit || 'Gửi'}</Button>
+                {props.cancel && <Button className="form-action form-btn-cancel flex-1 btn btn-soft btn-secondary" color='default' variant='filled' onClick={handleCancel}>Thoát</Button>}
             </div>
         </div>
     );
