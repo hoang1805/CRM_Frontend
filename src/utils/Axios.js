@@ -39,8 +39,6 @@ async function refreshCsrfToken() {
 
 // Interceptor thêm CSRF token trước request
 api.interceptors.request.use(async (config) => {
-    // console.log(authInstance);
-
     if (EXCLUDED_URLS.some(url => config.url.startsWith(url))) {
         return config;
     }
@@ -49,11 +47,20 @@ api.interceptors.request.use(async (config) => {
 
     if (!csrfToken) {
         console.log("CSRF hết hạn hoặc không có. Đang refresh...");
-        csrfToken = await refreshCsrfToken();
+
+        // Tránh refresh liên tục bằng cách kiểm tra flag
+        if (!window.isRefreshingCsrf) {
+            window.isRefreshingCsrf = true;
+            csrfToken = await refreshCsrfToken();
+            window.isRefreshingCsrf = false;
+        } else {
+            console.log("Đang chờ refresh CSRF, không gọi lại.");
+            return Promise.reject("CSRF token hết hạn, đang đợi refresh.");
+        }
 
         if (!csrfToken) {
             console.log("Không thể lấy lại CSRF. Chuyển hướng đến đăng nhập.");
-            authInstance?.logout(); // Gọi logout từ AuthContext
+            authInstance?.logout();
             window.location.href = "/login";
             return Promise.reject("CSRF token hết hạn, cần đăng nhập lại.");
         }
@@ -62,6 +69,7 @@ api.interceptors.request.use(async (config) => {
     config.headers["X-XSRF-TOKEN"] = csrfToken;
     return config;
 }, (error) => Promise.reject(error));
+
 
 // // Interceptor khi nhận response
 api.interceptors.response.use(response => response, async (error) => {
