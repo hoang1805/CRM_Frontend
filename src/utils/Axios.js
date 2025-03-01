@@ -9,7 +9,7 @@ const api = axios.create({
 });
 
 // Danh sách API không cần CSRF
-const EXCLUDED_URLS = ["/api/login", "/api/public"];
+const EXCLUDED_URLS = ["/api/login", "/api/public", "/api/csrf.token"];
 
 let authInstance = null; // Biến này sẽ lưu `logout()`
 
