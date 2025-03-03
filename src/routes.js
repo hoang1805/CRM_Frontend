@@ -96,16 +96,16 @@ const router = createBrowserRouter([
         path: '/settings',
         element: <MainLayout />,
         children: [
-            { path: '', element: <PrivateRoute element={<Settings />} /> },
+            { path: '', element: <PrivateRoute element={<Settings />} roles={[Role.ADMIN, Role.MANAGER, Role.SUPER_ADMIN]}  /> },
             {
                 path: 'sources',
-                element: <PrivateRoute element={<Sources />} />,
+                element: <PrivateRoute element={<Sources />} roles={[Role.ADMIN, Role.MANAGER, Role.SUPER_ADMIN]}/>,
             },
             {
                 path: 'relationships',
-                element: <PrivateRoute element={<Relationships />} />,
+                element: <PrivateRoute element={<Relationships />} roles={[Role.ADMIN, Role.MANAGER, Role.SUPER_ADMIN]}/>,
             },
-            { path: 'users', element: <PrivateRoute element={<Users />} /> },
+            { path: 'users', element: <PrivateRoute element={<Users />} roles={[Role.ADMIN, Role.MANAGER, Role.SUPER_ADMIN]} /> },
             {
                 path: 'systems',
                 element: (
