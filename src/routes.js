@@ -29,6 +29,7 @@ import Users from './views/setting/Users';
 import AddUser from './views/user/AddUser';
 import EditUser from './views/user/EditUser';
 import UserDetail from './views/user/UserDetail';
+import Systems from './views/setting/Systems';
 
 function PrivateRoute({ element, roles = [] }) {
     const { user } = useContext(AuthContext);
@@ -39,15 +40,12 @@ function PrivateRoute({ element, roles = [] }) {
 
     load();
 
-    if ((roles.length === 0 || roles.includes(user.role)) && element) {
-        return element;
-    }
-
     if (roles.length !== 0 && !roles.includes(user.role)) {
         flash.error('You do not have permission to access this page');
+        return <Navigate to="/" />;
     }
 
-    return <Navigate to="/" />;
+    return element;
 }
 
 const router = createBrowserRouter([
@@ -108,6 +106,15 @@ const router = createBrowserRouter([
                 element: <PrivateRoute element={<Relationships />} />,
             },
             { path: 'users', element: <PrivateRoute element={<Users />} /> },
+            {
+                path: 'systems',
+                element: (
+                    <PrivateRoute
+                        element={<Systems />}
+                        roles={[Role.SUPER_ADMIN]}
+                    />
+                ),
+            },
         ],
     },
     {
@@ -119,9 +126,12 @@ const router = createBrowserRouter([
         path: '/user',
         element: <MainLayout />,
         children: [
-            {path: ':id', element: <PrivateRoute element={<UserDetail />}/>},
+            { path: ':id', element: <PrivateRoute element={<UserDetail />} /> },
             { path: 'create', element: <PrivateRoute element={<AddUser />} /> },
-            { path: 'edit/:id', element: <PrivateRoute element={<EditUser />} />}
+            {
+                path: 'edit/:id',
+                element: <PrivateRoute element={<EditUser />} />,
+            },
         ],
     },
     {

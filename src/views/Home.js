@@ -189,7 +189,7 @@ const Home = () => {
                     />
                 </Section>
                 <Section title="Truy cập nhanh" className="quick-access">
-                    <button className="bg-blue-400" onClick={() => navigate('/task')}>Danh sách công việc</button>
+                    <button className="bg-blue-400" onClick={() => navigate('/tasks')}>Danh sách công việc</button>
                     <button className="bg-green-400" onClick={() => navigate('/account/list')}>
                         Danh sách khách hàng
                     </button>

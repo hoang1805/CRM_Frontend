@@ -1,13 +1,20 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import Header from '../../components/page/Header';
 import { RiSettings3Fill } from 'react-icons/ri';
 import MainContent from '../../components/page/MainContent';
 import Section from '../../components/elements/Section';
 import '../../styles/views/setting/settings.scss';
 import { useNavigate } from 'react-router-dom';
+import AuthContext from '../../context/AuthContext';
+import Role from '../../utils/Role';
+
+function isSuperAdmin(user) {
+    return user.role === Role.SUPER_ADMIN;
+}
 
 const Settings = () => {
     const navigate = useNavigate();
+    const {user} = useContext(AuthContext);
     return (
         <div className='settings-page'>
             <Header icon={<RiSettings3Fill className='icon'/>} title={"Cài đặt"}/>
@@ -29,6 +36,11 @@ const Settings = () => {
                             <div className='description'>Cài đặt thông tin về người dùng</div>
                             <div className='button text-blue-600/100 font-medium'>Chi tiết</div>
                         </li>
+                        {isSuperAdmin(user) && <li className='settings-action' onClick={() => navigate('/settings/systems')}>
+                            <div className='name'>Quản lý hệ thống</div>
+                            <div className='description'>Cài đặt thông tin về hệ thống</div>
+                            <div className='button text-blue-600/100 font-medium'>Chi tiết</div>
+                        </li>}
                     </ul>
                 </Section>
             </MainContent>

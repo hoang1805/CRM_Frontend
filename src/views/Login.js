@@ -6,6 +6,7 @@ import '../styles/views/login.scss';
 import AuthContext from '../context/AuthContext';
 import flash from '../utils/Flash';
 import popup from '../utils/popup/Popup';
+import load from '../utils/Loader';
 
 const Login = () => {
     const [username, setUsername] = useState('');
@@ -34,6 +35,7 @@ const Login = () => {
             const user = response.data.user;
             auth_context.login(user);
             flash.success('Login successful');
+            load();
             navigate('/home');
         } catch (error) {
             popup.error(error.response?.data?.message || error.message || 'Có lỗi xảy ra');
@@ -54,6 +56,7 @@ const Login = () => {
                     if (user.id === auth_context.user.id) {
                         auth_context.login(user);
                         flash.success('Login successful');
+                        load();
                         navigate('/home');
                     } else {
                         auth_context.logout();

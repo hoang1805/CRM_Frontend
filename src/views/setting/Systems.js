@@ -16,6 +16,9 @@ import Header from '../../components/page/Header';
 import { RiSettings3Fill } from 'react-icons/ri';
 import MainContent from '../../components/page/MainContent';
 import AuthContext from '../../context/AuthContext';
+import popup from '../../utils/popup/Popup';
+import drawer from '../../utils/Drawer';
+import SystemDrawerForm from '../../components/system/SystemDrawerForm';
 
 const useStyle = createStyles(({ css, token }) => {
     const { antCls } = token;
@@ -44,48 +47,32 @@ const renderEmpty = (component_name) => {
     }
 };
 
-function isSuperAdmin(user) {
-    return user?.role === Role.SUPER_ADMIN;
-}
-
-const getActions = (user, navigate, current) => {
-    const acl = user.acl;
-    let admin = {};
-    if (isSuperAdmin(current)) {
-        admin = {
-            key: 'grant.admin',
-            label: <div>Phân quyền quản trị</div>,
-            disabled:
-                !acl.edit || (current.role != Role.SUPER_ADMIN) ||
-                user.role == Role.ADMIN ||
-                user.id == current.id,
-            onClick: async () => {
-                try {
-                    loading.show();
-                    await api.post(`/api/user/grant/admin/${user.id}`);
-                    flash.success('Phân quyền quản trị thành công!!');
-                    // navigate(`/settings/user/grant/manager/${user.id}`);
-                    navigate(0);
-                } catch (e) {
-                    flash.error('Phân quyền quản trị thất bại!!');
-                } finally {
-                    loading.hide();
-                }
-            },
-        };
-    }
+const getActions = (system, navigate, current) => {
+    const acl = system.acl;
     return {
         items: [
-            {
-                key: 'detail',
-                label: <div>Chi tiết</div>,
-                onClick: () => navigate(`/user/${user.id}`),
-            },
             {
                 key: 'edit',
                 label: <div>Sửa</div>,
                 disabled: !acl.edit,
-                onClick: () => navigate(`/user/edit/${user.id}`),
+                onClick: () => {
+                    drawer.showForm({
+                        title: 'Sửa thông tin hệ thống',
+                        url: `api/system/edit/${system.id}`,
+                        callback: () => {
+                            flash.success('Cập nhật thành công!');
+                            navigate(0);
+                        },
+                        width: 500,
+                        submit: 'Cập nhật',
+                        content: (
+                            <SystemDrawerForm
+                                value={system}
+                                submit="Cập nhật"
+                            />
+                        ),
+                    });
+                },
             },
             {
                 key: 'delete',
@@ -94,113 +81,42 @@ const getActions = (user, navigate, current) => {
                 danger: true,
                 onClick: () =>
                     confirm.show(
-                        'Are you sure you want to delete this user? This action can not be undone.',
+                        'Are you sure you want to delete this system? This action can not be undone.',
                         (choose) => {
                             if (choose) {
-                                const deleteUser = async () => {
+                                const deleteSystem = async () => {
                                     try {
                                         loading.show();
                                         const response = await api.delete(
-                                            `/api/user/${user.id}`
+                                            `/api/system/delete/${system.id}`
                                         );
                                         flash.success(
-                                            'Xóa người dùng thành công !!'
+                                            'Xóa hệ thống thành công !!'
                                         );
                                         navigate(0);
                                     } catch (e) {
-                                        flash.error(
-                                            'Xóa người dùng thất bại!!'
+                                        // flash.error(
+                                        //     'Xóa người dùng thất bại!!'
+                                        // );
+                                        popup.error(
+                                            e?.response?.data.message ||
+                                                e?.message ||
+                                                'Đã có lỗi xảy ra'
                                         );
                                     } finally {
                                         loading.hide();
                                     }
                                 };
-                                deleteUser();
+                                deleteSystem();
                             }
                         }
                     ),
-            },
-            admin,
-            {
-                key: 'grant.manager',
-                label: <div>Phân quyền quản lý</div>,
-                disabled:
-                    !acl.edit || (current.role != Role.SUPER_ADMIN && current.role != Role.ADMIN) ||
-                    user.role == Role.ADMIN ||
-                    user.role == Role.MANAGER ||
-                    user.id == current.id,
-                onClick: async () => {
-                    try {
-                        loading.show();
-                        await api.post(`/api/user/grant/manager/${user.id}`);
-                        flash.success('Phân quyền quản lý thành công!!');
-                        // navigate(`/settings/user/grant/manager/${user.id}`);
-                        navigate(0);
-                    } catch (e) {
-                        flash.error('Phân quyền quản lý thất bại!!');
-                    } finally {
-                        loading.hide();
-                    }
-                },
-            },
-            {
-                key: 'grant.staff',
-                label: <div>Phân quyền nhân viên</div>,
-                disabled:
-                    !acl.edit || (current.role != Role.SUPER_ADMIN && current.role != Role.ADMIN) ||
-                    user.role == Role.ADMIN ||
-                    user.role == Role.STAFF ||
-                    user.id == current.id,
-                onClick: async () => {
-                    try {
-                        loading.show();
-                        await api.post(`/api/user/grant/staff/${user.id}`);
-                        flash.success('Phân quyền nhân viên thành công!!');
-                        navigate(0);
-                    } catch (e) {
-                        flash.error('Phân quyền nhân viên thất bại!!');
-                    } finally {
-                        loading.hide();
-                    }
-                },
-            },
-            {
-                key: 'reset.password',
-                label: <div>Reset mật khẩu</div>,
-                disabled:
-                    !acl.edit ||
-                    user.role == Role.ADMIN ||
-                    user.id == current.id,
-                onClick: async () => {
-                    try {
-                        loading.show();
-                        await api.post(`/api/user/reset.password/${user.id}`);
-                        flash.success('Reset mật khẩu thành công!!');
-                        navigate(0);
-                    } catch (e) {
-                        flash.error('Reset mật khẩu thất bại!!');
-                    } finally {
-                        loading.hide();
-                    }
-                },
             },
         ],
     };
 };
 
-const getColumns = (users, navigate, pagination, current, systems = []) => {
-    let system = {};
-    if (isSuperAdmin(current)) {
-        system = {
-            title: 'Hệ thống',
-            dataIndex: 'system_id',
-            render: (e) => {
-                return systems.find((s) => s.id === e)?.name || '';
-            },
-            width: 250,
-            fixed: 'left',
-        };
-    }
+const getColumns = (systems, navigate, pagination, current) => {
     return [
         {
             title: '#',
@@ -210,71 +126,16 @@ const getColumns = (users, navigate, pagination, current, systems = []) => {
                 (pagination.current - 1) * pagination.pageSize + index + 1,
         },
         {
-            title: 'Tên người dùng',
+            title: 'Tên hệ thống',
             dataIndex: 'name',
             width: 150,
             fixed: 'left',
         },
         {
-            title: 'Username',
-            dataIndex: 'username',
+            title: 'Giới hạn số người dùng',
+            dataIndex: 'max_user',
             width: 150,
             fixed: 'left',
-        },
-        system,
-        {
-            title: 'Số điện thoại',
-            dataIndex: 'phone',
-            width: 150,
-        },
-        {
-            title: 'Email',
-            dataIndex: 'email',
-            width: 200,
-        },
-        {
-            title: 'Giới tính',
-            dataIndex: 'gender',
-            render: (e) => {
-                return Gender.fromContext(e)?.label || 'Khác';
-            },
-            width: 100,
-        },
-        {
-            title: 'Ngày sinh',
-            dataIndex: 'birthday',
-            render: (e) => {
-                return e ? DateHelpers.formatDate(e, 'DD-MM-YYYY') : '';
-            },
-            width: 150,
-        },
-        {
-            title: 'Chức danh',
-            dataIndex: 'title',
-            render: (e) => {
-                return e ? e : '';
-            },
-            width: 200,
-        },
-        {
-            title: 'Quyền',
-            dataIndex: 'role',
-            render: (e) => {
-                if (e == Role.ADMIN) {
-                    return 'Người quản trị';
-                }
-
-                if (e == Role.MANAGER) {
-                    return 'Người quản lý';
-                }
-
-                if (e == Role.STAFF) {
-                    return 'Nhân viên';
-                }
-
-                return 'Không có dữ liệu';
-            },
-            width: 200,
         },
         {
             title: 'Ngày tạo',
@@ -289,15 +150,6 @@ const getColumns = (users, navigate, pagination, current, systems = []) => {
             dataIndex: 'last_update',
             render: (e) => {
                 return e ? DateHelpers.formatDate(e, 'DD-MM-YYYY') : '';
-            },
-            width: 150,
-        },
-        {
-            title: 'Người tạo',
-            dataIndex: 'creator_id',
-            render: (e) => {
-                let user = Arr.findById(users, e);
-                return user ? user.name : '';
             },
             width: 150,
         },
@@ -319,22 +171,20 @@ const getColumns = (users, navigate, pagination, current, systems = []) => {
     ];
 };
 
-const Users = () => {
-    const [users, setUsers] = useState([]);
+const Systems = () => {
+    const [systems, setSystems] = useState([]);
     const [loading, setLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
     const { styles } = useStyle();
     const navigate = useNavigate();
 
-    const [users_cache, setUsersCache] = useState(Client.get('users'));
     const [systems_cache, setSystemsCache] = useState(Client.get('systems'));
 
     const auth = useContext(AuthContext);
 
     useEffect(() => {
         const unsubscribe = Client.subscribe(() => {
-            setUsersCache(Client.get('users'));
             setSystemsCache(Client.get('systems'));
         });
 
@@ -342,10 +192,10 @@ const Users = () => {
     }, []);
 
     useEffect(() => {
-        async function loadUsers() {
+        async function loadSystems() {
             setLoading(true);
             try {
-                const response = await api.get(`/api/user/list`, {
+                const response = await api.get(`/api/system/list`, {
                     params: {
                         ipp: pageSize,
                         page: currentPage - 1,
@@ -354,39 +204,52 @@ const Users = () => {
                 const data = response.data || [];
 
                 if (Array.isArray(data.content)) {
-                    setUsers(data.content);
+                    setSystems(data.content);
                 } else {
-                    setUsers([]);
+                    setSystems([]);
                 }
             } catch (error) {
-                setUsers([]);
+                setSystems([]);
             } finally {
                 setLoading(false);
             }
         }
 
-        loadUsers();
+        loadSystems();
     }, [pageSize, currentPage]);
 
     return (
-        <div className="users-page">
+        <div className="systems-page">
             <Header
                 icon={<RiSettings3Fill className="icon" />}
                 title={'Cấu hình hệ thống'}
                 subtitle={'Quản lý người dùng'}
             />
-            <MainContent className="users">
+            <MainContent className="systems">
                 <div className="container mx-auto">
                     <div className="flex justify-between items-center mb-4">
                         <div className="flex items-center gap-4 flex-1">
                             <div className="text-lg font-semibold">
-                                Quản lý người dùng
+                                Quản lý hệ thống
                             </div>
                         </div>
                         <Button
                             type="primary"
                             onClick={() => {
-                                navigate('/user/create');
+                                drawer.showForm({
+                                    title: 'Thêm hệ thống',
+                                    url: `api/system/create`,
+                                    callback: () => {
+                                        flash.success('Thêm mới thành công!');
+                                        navigate(0);
+                                    },
+                                    width: 500,
+                                    submit: 'Thêm',
+                                    content: (
+                                        <SystemDrawerForm
+                                        />
+                                    ),
+                                });
                             }}
                         >
                             Thêm mới
@@ -396,18 +259,17 @@ const Users = () => {
                         <Table
                             className={styles.customTable}
                             columns={getColumns(
-                                users_cache,
+                                systems_cache,
                                 navigate,
                                 {
                                     current: currentPage,
                                     pageSize: pageSize,
                                 },
-                                auth.user,
-                                systems_cache
+                                auth.system
                             )}
                             rowKey={(e) => e.id}
                             bordered
-                            dataSource={users}
+                            dataSource={systems}
                             pagination={{
                                 showSizeChanger: true,
                                 showTotal: (total, range) =>
@@ -438,4 +300,4 @@ const Users = () => {
     );
 };
 
-export default Users;
+export default Systems;
