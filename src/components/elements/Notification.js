@@ -67,6 +67,7 @@ const Notification = (props) => {
     const [ipp, setIpp] = useState(10);
     const [load, setLoad] = useState(false);
 
+
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -76,6 +77,12 @@ const Notification = (props) => {
 
         return () => unsubscribe();
     }, []);
+
+    useEffect(() => {
+        if (unread < 0) {
+            setUnread(0);
+        }
+    }, [unread]);
 
     useEffect(() => {
         const countUnread = async () => {
@@ -283,7 +290,8 @@ const Notification = (props) => {
                                 color="primary"
                                 variant="link"
                                 disabled={item.is_read}
-                                onClick={() => {
+                                onClick={(e) => {
+                                    e.stopPropagation();
                                     markRead(item);
                                 }}
                             >
