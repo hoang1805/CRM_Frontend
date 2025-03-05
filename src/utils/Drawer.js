@@ -71,7 +71,7 @@ const DrawerComponent = ({ isOpen, close, ...props }) => {
         loading.show();
         // console.log(child_refs.current);
         // console.log(Object.keys(child_refs.current));
-        const data = {};
+        let data = {};
         for (let key = 0; key < count; key++) {
             const current =
                 child_refs.current[key] || child_refs.current[String(key)];
@@ -86,8 +86,12 @@ const DrawerComponent = ({ isOpen, close, ...props }) => {
             if (typeof current.getValues === 'function') {
                 let values = current.getValues();
                 console.log(values);
-                if (values) {
+                if (values && typeof values === 'object') {
                     Object.assign(data, values);
+                }
+
+                if (values && typeof values !== 'object') {
+                    data = values;
                 }
             }
         }
