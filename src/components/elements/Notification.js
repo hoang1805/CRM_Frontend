@@ -162,10 +162,10 @@ const Notification = (props) => {
     }, [auth.user.id]); // Đảm bảo reset WebSocket khi user thay đổi
 
     useEffect(() => {
-        loadMore();
+        loadMore(true);
     }, []);
 
-    const loadMore = () => {
+    const loadMore = (init = false) => {
         if (load) return;
 
         (async () => {
@@ -202,11 +202,15 @@ const Notification = (props) => {
 
                 setTotal(data.totalElements || notifications.length);
                 setLoad(false);
-                flash.success('Load notifications successfully');
+                if (!init) {
+                    flash.success('Load notifications successfully');
+                }
             } catch (error) {
                 console.error('Error load notifications:', error);
                 setLoad(false);
-                flash.error('Load notifications failed');
+                if (!init) {
+                    flash.error('Load notifications failed');
+                }
             } finally {
                 loading.hide();
             }
