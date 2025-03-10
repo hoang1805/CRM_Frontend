@@ -8,7 +8,7 @@ import React, {
 
 const desc = ['terrible', 'bad', 'normal', 'good', 'wonderful'];
 const InputRating = forwardRef((props, ref) => {
-    const [value, setValue] = useState(props.value || '');
+    const [value, setValue] = useState(props.value || props.defaultValue || 0);
     const [error, setError] = useState('');
 
     useImperativeHandle(ref, () => ({
@@ -32,7 +32,7 @@ const InputRating = forwardRef((props, ref) => {
     }, [value]);
 
     useEffect(() => {
-        setValue(props.value || '');
+        setValue(   props.value || props.defaultValue || 0);
         setError('');
     }, [props.value]);
 

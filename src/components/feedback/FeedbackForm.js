@@ -11,7 +11,7 @@ const FeedbackForm = ({ callback, token }) => {
             submit={'Gửi đánh giá'}
             url={`/api/public/feedback/${token}`}
         >
-            <InputRating label='Đánh giá của bạn *' name='rating' defaultValue={0} />
+            <InputRating label='Đánh giá của bạn *' name='rating' defaultValue={1} />
             <InputTextarea label='Mô tả đánh giá' name='content'/>
         </InlineForm>
     );
