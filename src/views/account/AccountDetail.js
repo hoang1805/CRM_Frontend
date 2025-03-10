@@ -24,6 +24,7 @@ import flyonui from 'flyonui';
 import AccountTask from './details/AccountTask';
 import AccountProduct from './details/AccountProduct';
 import AccountFeedback from './details/AccountFeedback';
+import flash from '../../utils/Flash';
 
 const siderStyle = {
     overflow: 'auto',
@@ -55,9 +56,8 @@ const AccountDetail = () => {
                 setAccount(response.data.account);
             } catch (err) {
                 console.log(err);
-                setError(
-                    err.message || 'Đã có lỗi xảy ra, vui lòng thử lại sau'
-                );
+                flash.error(err?.response?.data?.message || err.message || 'Đã có lỗi xảy ra, vui lòng thử lại sau');
+                navigate(-1);
             } finally {
                 loading.hide();
             }

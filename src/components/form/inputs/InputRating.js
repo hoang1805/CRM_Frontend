@@ -29,7 +29,7 @@ const InputRating = forwardRef((props, ref) => {
 
     useEffect(() => {
         setError(validate() || '');
-    }, [value]);
+    }, [value]);    
 
     useEffect(() => {
         setValue(   props.value || props.defaultValue || 0);
@@ -55,6 +55,7 @@ const InputRating = forwardRef((props, ref) => {
                     value={value}
                     starSize={props.size || 20}
                     defaultValue={props.defaultValue || 0}
+                    allowClear={props.allowClear || false}
                 />
                 {/* {value ? <span>{desc[value - 1]}</span> : null} */}
                 {error && (
