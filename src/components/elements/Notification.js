@@ -67,6 +67,8 @@ const Notification = (props) => {
     const [ipp, setIpp] = useState(10);
     const [load, setLoad] = useState(false);
 
+    const [init, setInit] = useState(true);
+
 
     const navigate = useNavigate();
 
@@ -162,10 +164,11 @@ const Notification = (props) => {
     }, [auth.user.id]); // Đảm bảo reset WebSocket khi user thay đổi
 
     useEffect(() => {
-        loadMore(true);
+        loadMore();
+        setInit(false);
     }, []);
 
-    const loadMore = (init = false) => {
+    const loadMore = () => {
         if (load) return;
 
         (async () => {
@@ -216,8 +219,6 @@ const Notification = (props) => {
             }
         })();
     };
-
-    console.log(notifications);
 
     const markRead = async (item) => {
         try {
