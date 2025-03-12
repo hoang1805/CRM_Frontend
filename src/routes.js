@@ -30,6 +30,7 @@ import AddUser from './views/user/AddUser';
 import EditUser from './views/user/EditUser';
 import UserDetail from './views/user/UserDetail';
 import Systems from './views/setting/Systems';
+import NotFound from './views/NotFound';
 
 function PrivateRoute({ element, roles = [] }) {
     const { user } = useContext(AuthContext);
@@ -139,6 +140,10 @@ const router = createBrowserRouter([
         element: <PublicLayout />,
         children: [{ path: 'feedback/:token', element: <Feedback /> }],
     },
+    {
+        path: '*',
+        element: <NotFound />,
+    }
 ]);
 
 export default router;
