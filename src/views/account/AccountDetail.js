@@ -41,6 +41,7 @@ const AccountDetail = () => {
     const { id } = useParams();
     const [account, setAccount] = useState({});
     const [error, setError] = useState({});
+    const [data, setData] = useState({});
     const location = useLocation();
     const navigate = useNavigate();
     const query_params = new URLSearchParams(location.search);
@@ -54,6 +55,11 @@ const AccountDetail = () => {
                 loading.show();
                 const response = await api.get(`/api/account/${id || ''}`);
                 setAccount(response.data.account);
+                setData({
+                    last_contact: response.data.last_contact,
+                    total_contact: response.data.number_contacts,
+                    total: response.data.total
+                });
             } catch (err) {
                 console.log(err);
                 flash.error(err?.response?.data?.message || err.message || 'Đã có lỗi xảy ra, vui lòng thử lại sau');
@@ -84,7 +90,7 @@ const AccountDetail = () => {
                         className="mr-[5px] bg-white p-2 border rounded-lg"
                         style={siderStyle}
                     >
-                        <AccountInformation account={account} />
+                        <AccountInformation account={account} data={data}/>
                     </Layout.Sider>
                     <Layout.Content className="ml-[5px] bg-white p-2 border rounded-lg">
                         <Tabs
