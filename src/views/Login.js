@@ -89,7 +89,7 @@ const Login = () => {
                 <input id="password" name="password" type="password" placeholder="Nhập mật khẩu" value={password} onChange={(e) => setPassword(e.target.value)} />
             </div>
             <div className="forgot-password">
-                <Link to='/forget.password'>Quên mật khẩu</Link>
+                {/* <Link to='/forget.password'>Quên mật khẩu</Link> */}
             </div>
             <button className="login-button" onClick={handleSubmit}>Đăng nhập</button>
         </div>
