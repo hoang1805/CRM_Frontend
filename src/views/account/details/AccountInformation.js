@@ -328,27 +328,21 @@ const AccountInformation = ({account, data}) => {
                     Ngày tạo
                     <div className="font-medium">
                         {account?.createdAt
-                            ? DateHelpers.formatDate(
-                                  account.createdAt,
-                                  'DD/MM/YYYY HH:mm'
-                              )
+                            ? dayjs(account?.createdAt).format('DD-MM-YYYY HH:mm:ss')
                             : 'Chưa có dữ liệu'}
                     </div>
                 </div>
                 <div className="flex flex-row items-center justify-between">
                     Đã mua
                     <div className="font-medium">
-                        {/* {source?.name || 'Chưa có dữ liệu'} */}1 lần
+                        {formatNumber(data.number_products || 0)} sản phẩm
                     </div>
                 </div>
                 <div className="flex flex-row items-center justify-between">
                     Lần mua hàng gần nhất
                     <div className="font-medium">
-                        {account?.lastUpdate
-                            ? DateHelpers.formatDate(
-                                  account.lastUpdate,
-                                  'DD/MM/YYYY HH:mm'
-                              )
+                        {data?.last_bought
+                            ? dayjs(data.last_bought).format('DD-MM-YYYY HH:mm:ss')
                             : 'Chưa có dữ liệu'}
                     </div>
                 </div>

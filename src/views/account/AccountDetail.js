@@ -58,7 +58,9 @@ const AccountDetail = () => {
                 setData({
                     last_contact: response.data.last_contact,
                     total_contact: response.data.number_contacts,
-                    total: response.data.total
+                    total: response.data.total,
+                    number_products: response.data.number_products,
+                    last_bought: response.data.last_bought
                 });
             } catch (err) {
                 console.log(err);
