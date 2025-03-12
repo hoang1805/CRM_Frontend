@@ -15,7 +15,7 @@ const items = [
         {name: "Tải lên khách hàng", path: '/account/import'}
     ]},
     {name: "Công việc", icon: <CgWorkAlt className='item-icon' />, path: '/tasks'},
-    {name: "Báo cáo", icon: <IoDocumentTextOutline className='item-icon' />, path: '/report'}
+    // {name: "Báo cáo", icon: <IoDocumentTextOutline className='item-icon' />, path: '/report'}
 ];
 
 const Item = ({name, icon, path, actions, top}) => {

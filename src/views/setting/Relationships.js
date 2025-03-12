@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import Header from '../../components/page/Header';
 import { RiSettings3Fill } from 'react-icons/ri';
 import MainContent from '../../components/page/MainContent';
@@ -17,6 +17,8 @@ import popup from '../../utils/popup/Popup';
 import { MoreOutlined } from '@ant-design/icons';
 import { Button, ConfigProvider, Dropdown, Empty, Table } from 'antd';
 import { createStyles } from 'antd-style';
+import Role from '../../utils/Role';
+import AuthContext from '../../context/AuthContext';
 
 const useStyle = createStyles(({ css, token }) => {
     const { antCls } = token;
@@ -45,7 +47,24 @@ const renderEmpty = (component_name) => {
     }
 };
 
-const getColumns = (relationships, navigate, users = [], pagination) => {
+function isSuperAdmin(user) {
+    return user?.role === Role.SUPER_ADMIN;
+}
+
+const getColumns = (relationships, navigate, users = [], pagination, current, systems = []) => {
+    let system = {};
+    if (isSuperAdmin(current)) {
+        system = {
+            title: 'Hệ thống',
+            dataIndex: 'system_id',
+            render: (e) => {
+                return systems.find((s) => s.id === e)?.name || '';
+            },
+            width: 250,
+            fixed: 'left',
+        };
+    }
+
     return [
         {
             title: '#',
@@ -60,6 +79,7 @@ const getColumns = (relationships, navigate, users = [], pagination) => {
                 return e.name;
             },
         },
+        system,
         {
             title: 'Màu mối quan hệ',
             render: (e) => {
@@ -95,14 +115,14 @@ const getColumns = (relationships, navigate, users = [], pagination) => {
             width: 200,
             render: (e) => {
                 const user = users.find(
-                    (u) => u.id === e.creatorId || u.id === e.creator_id
+                    (u) => u.id === e.creator_id
                 );
                 return (
                     <div>
                         <div>{user?.name || 'Không có dữ liệu'}</div>
                         <div className="text-sm text-gray-500">
                             {DateHelpers.formatDate(
-                                e.createdAt,
+                                e.created_at,
                                 'DD/MM/YYYY HH:mm'
                             )}
                         </div>
@@ -205,11 +225,15 @@ const Relationships = () => {
     const [pageSize, setPageSize] = useState(10);
     const { styles } = useStyle();
     const navigate = useNavigate();
+    const auth = useContext(AuthContext);
+
     const [users, setUsers] = useState(Client.get('users'));
+    const [systems_cache, setSystemsCache] = useState(Client.get('systems'));
 
     useEffect(() => {
         const unsubscribe = Client.subscribe(() => {
             setUsers(Client.get('users'));
+            setSystemsCache(Client.get('systems'));
         });
 
         return () => unsubscribe();
@@ -281,7 +305,9 @@ const Relationships = () => {
                                 {
                                     current: currentPage,
                                     pageSize: pageSize,
-                                }
+                                },
+                                auth.user,
+                                systems_cache
                             )}
                             rowKey={(e) => e.id}
                             bordered

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import Header from '../../components/page/Header';
 import { RiSettings3Fill } from 'react-icons/ri';
 import MainContent from '../../components/page/MainContent';
@@ -14,8 +14,28 @@ import popup from '../../utils/popup/Popup';
 import { Button, ConfigProvider, Dropdown, Empty, Input, Table } from 'antd';
 import { MoreOutlined } from '@ant-design/icons';
 import { createStyles } from 'antd-style';
+import Role from '../../utils/Role';
+import Client from '../../utils/client.manager';
+import AuthContext from '../../context/AuthContext';
 
-const getColumns = (sources, navigate, pagination) => {
+function isSuperAdmin(user) {
+    return user?.role === Role.SUPER_ADMIN;
+}
+
+const getColumns = (sources, navigate, pagination, current, systems = []) => {
+    let system = {};
+    if (isSuperAdmin(current)) {
+        system = {
+            title: 'Hệ thống',
+            dataIndex: 'system_id',
+            render: (e) => {
+                return systems.find((s) => s.id === e)?.name || '';
+            },
+            width: 250,
+            fixed: 'left',
+        };
+    }
+
     return [
         {
             title: '#',
@@ -32,6 +52,7 @@ const getColumns = (sources, navigate, pagination) => {
             title: 'Mã',
             dataIndex: 'code',
         },
+        system,
         {
             title: 'Nguồn khách hàng cha',
             width: 200,
@@ -162,6 +183,19 @@ const Sources = () => {
     const [pageSize, setPageSize] = useState(10);
     const { styles } = useStyle();
     const navigate = useNavigate();
+
+    const [systems_cache, setSystemsCache] = useState(Client.get('systems'));
+
+    const auth = useContext(AuthContext);
+
+    useEffect(() => {
+        const unsubscribe = Client.subscribe(() => {
+            setSystemsCache(Client.get('systems'));
+        });
+
+        return () => unsubscribe();
+    }, []);
+
     useEffect(() => {
         async function loadSources() {
             setLoading(true);
@@ -255,7 +289,7 @@ const Sources = () => {
                             columns={getColumns(sources, navigate, {
                                 current: currentPage,
                                 pageSize: pageSize,
-                            })}
+                            }, auth.user, systems_cache)}
                             rowKey={(e) => e.id}
                             bordered
                             dataSource={sources}

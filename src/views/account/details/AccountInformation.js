@@ -14,7 +14,11 @@ import { FiTarget } from 'react-icons/fi';
 import AvatarName from '../../../components/elements/AvatarName';
 import Client from '../../../utils/client.manager';
 import Arr from '../../../utils/Array';
+import dayjs from 'dayjs';
 
+const formatNumber = (e) => {
+    return `${e}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+};
 
 const calculateCompletion = (account, users, relationships, sources) => {
     if (!account || typeof account !== 'object') return 0;
@@ -73,7 +77,7 @@ const calculateCompletion = (account, users, relationships, sources) => {
     return Math.round(completionRate); // Làm tròn %
 };
 
-const AccountInformation = ({account}) => {
+const AccountInformation = ({account, data}) => {
     const navigate = useNavigate();
     const [relationships, setRelationships] = useState(
         Client.get('relationships') || []
@@ -254,7 +258,7 @@ const AccountInformation = ({account}) => {
                             }
                             hoverable
                         >
-                            <div className="font-medium text-center">10</div>
+                            <div className="font-medium text-center">{data.last_contact ? dayjs(data.last_contact).format('DD-MM-YYYY HH:mm:ss') : 0}</div>
                         </Card>
                     </Col>
                     <Col span={8}>
@@ -278,7 +282,7 @@ const AccountInformation = ({account}) => {
                             }
                             hoverable
                         >
-                            <div className="font-medium text-center">10</div>
+                            <div className="font-medium text-center">{data.total_contact || 0}</div>
                         </Card>
                     </Col>
                     <Col span={8}>
@@ -302,7 +306,7 @@ const AccountInformation = ({account}) => {
                             }
                             hoverable
                         >
-                            <div className="font-medium text-center">10</div>
+                            <div className="font-medium text-center">{formatNumber(data.total?.toFixed(0)) || 0} VND</div>
                         </Card>
                     </Col>
                 </Row>
@@ -324,27 +328,21 @@ const AccountInformation = ({account}) => {
                     Ngày tạo
                     <div className="font-medium">
                         {account?.createdAt
-                            ? DateHelpers.formatDate(
-                                  account.createdAt,
-                                  'DD/MM/YYYY HH:mm'
-                              )
+                            ? dayjs(account?.createdAt).format('DD-MM-YYYY HH:mm:ss')
                             : 'Chưa có dữ liệu'}
                     </div>
                 </div>
                 <div className="flex flex-row items-center justify-between">
                     Đã mua
                     <div className="font-medium">
-                        {/* {source?.name || 'Chưa có dữ liệu'} */}1 lần
+                        {formatNumber(data.number_products || 0)} sản phẩm
                     </div>
                 </div>
                 <div className="flex flex-row items-center justify-between">
                     Lần mua hàng gần nhất
                     <div className="font-medium">
-                        {account?.lastUpdate
-                            ? DateHelpers.formatDate(
-                                  account.lastUpdate,
-                                  'DD/MM/YYYY HH:mm'
-                              )
+                        {data?.last_bought
+                            ? dayjs(data.last_bought).format('DD-MM-YYYY HH:mm:ss')
                             : 'Chưa có dữ liệu'}
                     </div>
                 </div>

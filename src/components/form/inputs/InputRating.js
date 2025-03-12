@@ -8,7 +8,7 @@ import React, {
 
 const desc = ['terrible', 'bad', 'normal', 'good', 'wonderful'];
 const InputRating = forwardRef((props, ref) => {
-    const [value, setValue] = useState(props.value || '');
+    const [value, setValue] = useState(props.value || props.defaultValue || 0);
     const [error, setError] = useState('');
 
     useImperativeHandle(ref, () => ({
@@ -29,10 +29,10 @@ const InputRating = forwardRef((props, ref) => {
 
     useEffect(() => {
         setError(validate() || '');
-    }, [value]);
+    }, [value]);    
 
     useEffect(() => {
-        setValue(props.value || '');
+        setValue(   props.value || props.defaultValue || 0);
         setError('');
     }, [props.value]);
 
@@ -49,7 +49,14 @@ const InputRating = forwardRef((props, ref) => {
                 {props.label}
             </label>
             <div className="group-input">
-                <Rate tooltips={desc} onChange={setValue} value={value} starSize={props.size || 20}/>
+                <Rate
+                    tooltips={desc}
+                    onChange={setValue}
+                    value={value}
+                    starSize={props.size || 20}
+                    defaultValue={props.defaultValue || 0}
+                    allowClear={props.allowClear || false}
+                />
                 {/* {value ? <span>{desc[value - 1]}</span> : null} */}
                 {error && (
                     <p className="mt-2 text-sm text-red-600 dark:text-red-500">

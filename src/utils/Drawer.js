@@ -24,6 +24,15 @@ const DrawerComponent = ({ isOpen, close, ...props }) => {
     //     }
     // }, [isOpen]);
 
+    // const [update, setUpdate] = useState(0);
+    // const forceUpdate = () => {
+    //     setUpdate((prev) => prev + 1);
+    // }
+
+    // useEffect(() => {
+    //     forceUpdate();
+    // }, [props]);    
+
     let count = 0;
     const collectRefs = (children) => {
         return React.Children.map(children, (child) => {
@@ -62,7 +71,7 @@ const DrawerComponent = ({ isOpen, close, ...props }) => {
         loading.show();
         // console.log(child_refs.current);
         // console.log(Object.keys(child_refs.current));
-        const data = {};
+        let data = {};
         for (let key = 0; key < count; key++) {
             const current =
                 child_refs.current[key] || child_refs.current[String(key)];
@@ -77,8 +86,12 @@ const DrawerComponent = ({ isOpen, close, ...props }) => {
             if (typeof current.getValues === 'function') {
                 let values = current.getValues();
                 console.log(values);
-                if (values) {
+                if (values && typeof values === 'object') {
                     Object.assign(data, values);
+                }
+
+                if (values && typeof values !== 'object') {
+                    data = values;
                 }
             }
         }
@@ -111,24 +124,33 @@ const DrawerComponent = ({ isOpen, close, ...props }) => {
             onClose={props.form ? handleCancel : close}
             open={isOpen}
             extra={
-                props.form && (
-                    <Space>
-                        <Button
-                            onClick={handleSubmit}
-                            type='primary'
-                        >
-                            {props.submit || 'Gửi'}
-                        </Button>
+                <div>
+                    {props.form && (
+                        <Space>
+                            <Button onClick={handleSubmit} type="primary">
+                                {props.submit || 'Gửi'}
+                            </Button>
 
-                        {/* <button
+                            {/* <button
                             type="button"
                             className="btn btn-soft btn-secondary"
                             onClick={handleCancel}
                         >
                             Thoát
                         </button> */}
-                    </Space>
-                )
+                        </Space>
+                    )}
+                    {props.notification && (
+                        <Space>
+                            <Button onClick={props.loadMore} disabled={!props.canLoad}>
+                                Load more
+                            </Button>
+                            <Button onClick={props.markAll} type="primary" disabled={!props.canMark}>
+                                Mark all as read
+                            </Button>
+                        </Space>
+                    )}
+                </div>
             }
         >
             {isOpen && props.form ? collectRefs(props.content) : props.content}
@@ -140,10 +162,17 @@ const DrawerComponent = ({ isOpen, close, ...props }) => {
 // Singleton quản lý Drawer
 const drawer = {
     setDrawerState: null,
+    drawerState: null,
 
     show(props = {}) {
         if (drawer.setDrawerState) {
             drawer.setDrawerState({ isOpen: true, ...props });
+        }
+    },
+
+    update(props = {}) {
+        if (drawer.setDrawerState && drawer.drawerState?.isOpen) {
+            drawer.setDrawerState({...drawer.drawerState, ...props});
         }
     },
 
@@ -164,10 +193,12 @@ const drawer = {
 
         useEffect(() => {
             drawer.setDrawerState = setState;
+            drawer.drawerState = state;
             return () => {
                 drawer.setDrawerState = null;
+                drawer.drawerState = null;
             };
-        }, []);
+        }, [state]);
 
         return <DrawerComponent {...state} close={drawer.close} />;
     },

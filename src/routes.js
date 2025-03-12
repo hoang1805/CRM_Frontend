@@ -29,6 +29,8 @@ import Users from './views/setting/Users';
 import AddUser from './views/user/AddUser';
 import EditUser from './views/user/EditUser';
 import UserDetail from './views/user/UserDetail';
+import Systems from './views/setting/Systems';
+import NotFound from './views/NotFound';
 
 function PrivateRoute({ element, roles = [] }) {
     const { user } = useContext(AuthContext);
@@ -39,15 +41,12 @@ function PrivateRoute({ element, roles = [] }) {
 
     load();
 
-    if ((roles.length === 0 || roles.includes(user.role)) && element) {
-        return element;
-    }
-
     if (roles.length !== 0 && !roles.includes(user.role)) {
         flash.error('You do not have permission to access this page');
+        return <Navigate to="/" />;
     }
 
-    return <Navigate to="/" />;
+    return element;
 }
 
 const router = createBrowserRouter([
@@ -98,16 +97,25 @@ const router = createBrowserRouter([
         path: '/settings',
         element: <MainLayout />,
         children: [
-            { path: '', element: <PrivateRoute element={<Settings />} /> },
+            { path: '', element: <PrivateRoute element={<Settings />} roles={[Role.ADMIN, Role.MANAGER, Role.SUPER_ADMIN]}  /> },
             {
                 path: 'sources',
-                element: <PrivateRoute element={<Sources />} />,
+                element: <PrivateRoute element={<Sources />} roles={[Role.ADMIN, Role.MANAGER, Role.SUPER_ADMIN]}/>,
             },
             {
                 path: 'relationships',
-                element: <PrivateRoute element={<Relationships />} />,
+                element: <PrivateRoute element={<Relationships />} roles={[Role.ADMIN, Role.MANAGER, Role.SUPER_ADMIN]}/>,
             },
-            { path: 'users', element: <PrivateRoute element={<Users />} /> },
+            { path: 'users', element: <PrivateRoute element={<Users />} roles={[Role.ADMIN, Role.MANAGER, Role.SUPER_ADMIN]} /> },
+            {
+                path: 'systems',
+                element: (
+                    <PrivateRoute
+                        element={<Systems />}
+                        roles={[Role.SUPER_ADMIN]}
+                    />
+                ),
+            },
         ],
     },
     {
@@ -119,9 +127,12 @@ const router = createBrowserRouter([
         path: '/user',
         element: <MainLayout />,
         children: [
-            {path: ':id', element: <PrivateRoute element={<UserDetail />}/>},
+            { path: ':id', element: <PrivateRoute element={<UserDetail />} /> },
             { path: 'create', element: <PrivateRoute element={<AddUser />} /> },
-            { path: 'edit/:id', element: <PrivateRoute element={<EditUser />} />}
+            {
+                path: 'edit/:id',
+                element: <PrivateRoute element={<EditUser />} />,
+            },
         ],
     },
     {
@@ -129,6 +140,10 @@ const router = createBrowserRouter([
         element: <PublicLayout />,
         children: [{ path: 'feedback/:token', element: <Feedback /> }],
     },
+    {
+        path: '*',
+        element: <NotFound />,
+    }
 ]);
 
 export default router;

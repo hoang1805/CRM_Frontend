@@ -10,11 +10,12 @@ import '../styles/views/home.scss';
 import api from '../utils/Axios';
 import loading from '../utils/Loading';
 import { createStyles } from 'antd-style';
-import { ConfigProvider, Empty, Table } from 'antd';
+import { ConfigProvider, Empty, Progress, Table, Tag } from 'antd';
 import TaskStatus from './account/TaskStatus';
 import Arr from '../utils/Array';
 import Client from '../utils/client.manager';
 import { useNavigate } from 'react-router-dom';
+import Process from '../utils/Process';
 const renderEmpty = (component_name) => {
     if (component_name === 'Table.filter') {
         return (
@@ -57,6 +58,44 @@ const getColumns = (user, users) => {
             fixed: 'left',
         },
         {
+            title: 'Tiến trình',
+            width: 150,
+            fixed: 'left',
+            render: (e) => {
+                let process = Process.fromContext(e.process);
+                if (!process) {
+                    return <Tag>{'Không có dữ liệu'}</Tag>;
+                }
+
+                if (process.id != Process.DOING) {
+                    return <Tag color={process.color}>{process.label}</Tag>;
+                }
+
+                let percent = 0;
+
+                if (e.status == TaskStatus.IN_PROGRESS) {
+                    percent = 30;
+                } else if (e.status == TaskStatus.PENDING_APPROVAL) {
+                    percent = 60;
+                } else {
+                    percent = 90;
+                }
+
+                return <Progress percent={percent} type="line" />;
+            },
+        },
+        {
+            title: 'Trạng thái',
+            dataIndex: 'status',
+            width: 150,
+            fixed: 'left',
+            render: (e) => {
+                return e
+                    ? TaskStatus.fromContext(e)?.label
+                    : 'Không có dữ liệu';
+            },
+        },
+        {
             title: 'Ngày bắt đầu',
             dataIndex: 'start_date',
             width: 150,
@@ -96,16 +135,6 @@ const getColumns = (user, users) => {
             width: 200,
             render: (e) => {
                 return e ? e.name : 'Không có dữ liệu';
-            },
-        },
-        {
-            title: 'Trạng thái',
-            dataIndex: 'status',
-            width: 150,
-            render: (e) => {
-                return e
-                    ? TaskStatus.fromContext(e)?.label
-                    : 'Không có dữ liệu';
             },
         },
     ];
@@ -189,7 +218,7 @@ const Home = () => {
                     />
                 </Section>
                 <Section title="Truy cập nhanh" className="quick-access">
-                    <button className="bg-blue-400" onClick={() => navigate('/task')}>Danh sách công việc</button>
+                    <button className="bg-blue-400" onClick={() => navigate('/tasks')}>Danh sách công việc</button>
                     <button className="bg-green-400" onClick={() => navigate('/account/list')}>
                         Danh sách khách hàng
                     </button>

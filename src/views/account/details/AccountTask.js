@@ -4,9 +4,11 @@ import {
     Dropdown,
     Empty,
     Input,
+    Progress,
     Select,
     Space,
     Table,
+    Tag,
 } from 'antd';
 import React, { useContext, useEffect, useState } from 'react';
 import InputSelect from '../../../components/form/inputs/InputSelect';
@@ -23,6 +25,8 @@ import loading from '../../../utils/Loading';
 import AuthContext from '../../../context/AuthContext';
 import Client from '../../../utils/client.manager';
 import confirm from '../../../utils/popup/ConfirmPopup';
+import Process from '../../../utils/Process';
+import TaskReminder from '../../../components/task/TaskReminder';
 
 const renderEmpty = (component_name) => {
     if (component_name === 'Table.filter') {
@@ -55,260 +59,273 @@ const getActions = (task, account, user) => {
     const acl = task.acl;
     const canEdit = !!task?.acl?.edit;
     const canDelete = !!task?.acl?.delete;
-    let items = [];
-    let set_start = null;
+    const data = task?.data || {};
+
+    const toBoolean = (input) => {
+        if (input === undefined || input === null || input === '') return false;
+        return input === 'true' || input === true;
+    };
+    let items = [
+        {
+            label: <div>Sửa</div>,
+            onClick: () => {
+                drawer.showForm({
+                    title: 'Cập nhật công việc',
+                    url: `/api/task/edit/${task.id}`,
+                    callback: () => {
+                        flash.success('Cập nhật thành công!');
+                        window.location.reload();
+                    },
+                    width: 718,
+                    submit: 'Cập nhật',
+                    content: <TaskDrawerForm value={task} account={account} />,
+                });
+            },
+            key: 'edit',
+            disabled:
+                !canEdit ||
+                (task.status != TaskStatus.DRAFT &&
+                    task.status != TaskStatus.IN_PROGRESS),
+        },
+        {
+            label: <div>Sao chép</div>,
+            onClick: async () => {
+                try {
+                    loading.show();
+                    const response = await api.post(
+                        `/api/task/duplicate/${task.id}`
+                    );
+                    flash.success('Sao chép thành công!');
+                    window.location.reload();
+                } catch (err) {
+                    flash.error('Sao chép thất bại!');
+                } finally {
+                    loading.hide();
+                }
+            },
+            key: 'duplicate',
+            disabled: !canEdit,
+        },
+    ];
+
     if (acl.edit && task.status == TaskStatus.DRAFT) {
-        set_start = {
-            label: (
-                <div
-                    onClick={async () => {
-                        try {
-                            loading.show();
-                            await api.post(`/api/task/start/${task.id}`);
-                            flash.success('Thay đổi trạng thái thành công');
-                            window.location.reload();
-                        } catch (e) {
-                            console.error(e);
-                            flash.error('Thay đổi trạng thái thất bại');
-                        } finally {
-                            loading.hide();
-                        }
-                    }}
-                >
-                    Bắt đầu công việc
-                </div>
-            ),
-        };
+        items.push({
+            label: <div>Bắt đầu công việc</div>,
+            onClick: async () => {
+                try {
+                    loading.show();
+                    await api.post(`/api/task/start/${task.id}`);
+                    flash.success('Thay đổi trạng thái thành công');
+                    window.location.reload();
+                } catch (e) {
+                    console.error(e);
+                    flash.error('Thay đổi trạng thái thất bại');
+                } finally {
+                    loading.hide();
+                }
+            },
+            key: 'set_start',
+            disabled: task.status != TaskStatus.DRAFT,
+        });
     }
 
-    let request_approval = null;
     if (acl.edit && task.status == TaskStatus.IN_PROGRESS) {
-        request_approval = {
-            label: (
-                <div
-                    onClick={async () => {
-                        try {
-                            loading.show();
-                            await api.post(
-                                `/api/task/request.approval/${task.id}`
-                            );
-                            flash.success('Thay đổi trạng thái thành công');
-                            window.location.reload();
-                        } catch (e) {
-                            console.error(e);
-                            flash.error('Thay đổi trạng thái thất bại');
-                        } finally {
-                            loading.hide();
-                        }
-                    }}
-                >
-                    Yêu cầu duyệt
-                </div>
-            ),
-        };
+        items.push({
+            label: <div>Yêu cầu duyệt</div>,
+            onClick: async () => {
+                try {
+                    loading.show();
+                    await api.post(`/api/task/request.approval/${task.id}`);
+                    flash.success('Thay đổi trạng thái thành công');
+                    window.location.reload();
+                } catch (e) {
+                    console.error(e);
+                    flash.error('Thay đổi trạng thái thất bại');
+                } finally {
+                    loading.hide();
+                }
+            },
+            key: 'request_approval',
+            disabled: task.status != TaskStatus.IN_PROGRESS,
+        });
     }
 
-    let approve = null;
     if (acl.review && task.status == TaskStatus.PENDING_APPROVAL) {
-        approve = {
-            label: (
-                <div
-                    onClick={async () => {
-                        try {
-                            loading.show();
-                            await api.post(`/api/task/approve/${task.id}`);
-                            flash.success('Thay đổi trạng thái thành công');
-                            window.location.reload();
-                        } catch (e) {
-                            console.error(e);
-                            flash.error('Thay đổi trạng thái thất bại');
-                        } finally {
-                            loading.hide();
-                        }
-                    }}
-                >
-                    Chấp nhận
-                </div>
-            ),
-        };
+        items.push({
+            label: <div>Chấp nhận</div>,
+            onClick: async () => {
+                try {
+                    loading.show();
+                    await api.post(`/api/task/approve/${task.id}`);
+                    flash.success('Thay đổi trạng thái thành công');
+                    window.location.reload();
+                } catch (e) {
+                    console.error(e);
+                    flash.error('Thay đổi trạng thái thất bại');
+                } finally {
+                    loading.hide();
+                }
+            },
+            key: 'approve',
+            disabled: task.status != TaskStatus.PENDING_APPROVAL,
+        });
     }
 
-    let reject = null;
     if (acl.review && task.status == TaskStatus.PENDING_APPROVAL) {
-        reject = {
-            label: (
-                <div
-                    onClick={async () => {
-                        try {
-                            loading.show();
-                            await api.post(`/api/task/reject/${task.id}`);
-                            flash.success('Thay đổi trạng thái thành công');
-                            window.location.reload();
-                        } catch (e) {
-                            console.error(e);
-                            flash.error('Thay đổi trạng thái thất bại');
-                        } finally {
-                            loading.hide();
-                        }
-                    }}
-                >
-                    Từ chối
-                </div>
-            ),
-        };
+        items.push({
+            label: <div>Từ chối</div>,
+            onClick: async () => {
+                try {
+                    loading.show();
+                    await api.post(`/api/task/reject/${task.id}`);
+                    flash.success('Thay đổi trạng thái thành công');
+                    window.location.reload();
+                } catch (e) {
+                    console.error(e);
+                    flash.error('Thay đổi trạng thái thất bại');
+                } finally {
+                    loading.hide();
+                }
+            },
+            key: 'reject',
+            disabled: task.status != TaskStatus.PENDING_APPROVAL,
+        });
     }
 
-    let complete = null;
     if (acl.review && task.status == TaskStatus.APPROVED) {
-        complete = {
-            label: (
-                <div
-                    onClick={async () => {
-                        try {
-                            loading.show();
-                            await api.post(`/api/task/complete/${task.id}`);
-                            flash.success('Thay đổi trạng thái thành công');
-                            window.location.reload();
-                        } catch (e) {
-                            console.error(e);
-                            flash.error('Thay đổi trạng thái thất bại');
-                        } finally {
-                            loading.hide();
-                        }
-                    }}
-                >
-                    Hoàn thành
-                </div>
-            ),
-            key: '2',
-            disable: task.status != TaskStatus.COMPLETED,
-        };
+        items.push({
+            label: <div>Hoàn thành</div>,
+            onClick: async () => {
+                try {
+                    loading.show();
+                    await api.post(`/api/task/complete/${task.id}`);
+                    flash.success('Thay đổi trạng thái thành công');
+                    window.location.reload();
+                } catch (e) {
+                    console.error(e);
+                    flash.error('Thay đổi trạng thái thất bại');
+                } finally {
+                    loading.hide();
+                }
+            },
+            key: 'complete',
+            disabled: task.status != TaskStatus.APPROVED,
+        });
     }
 
-    let cancel = null;
     if (user.id == task.manager_id || user.id == task.creator_id) {
-        cancel = {
-            label: (
-                <div
-                    onClick={async () => {
-                        try {
-                            loading.show();
-                            await api.post(`/api/task/cancel/${task.id}`);
-                            flash.success('Thay đổi trạng thái thành công');
-                            window.location.reload();
-                        } catch (e) {
-                            console.error(e);
-                            flash.error('Thay đổi trạng thái thất bại');
-                        } finally {
-                            loading.hide();
-                        }
-                    }}
-                >
-                    Hủy
-                </div>
-            ),
-        };
+        items.push({
+            label: <div>Hủy</div>,
+            onClick: async () => {
+                try {
+                    loading.show();
+                    await api.post(`/api/task/cancel/${task.id}`);
+                    flash.success('Thay đổi trạng thái thành công');
+                    window.location.reload();
+                } catch (e) {
+                    console.error(e);
+                    flash.error('Thay đổi trạng thái thất bại');
+                } finally {
+                    loading.hide();
+                }
+            },
+            key: 'cancel',
+            disabled: task.status == TaskStatus.CANCELLED,
+        });
+    }
+
+    if (canEdit && task.process == Process.DOING) {
+        items.push({
+            label: <div>Bật lời nhắc</div>,
+            key: 'enable.reminder',
+            disabled: toBoolean(data?.enable_remind),
+            onClick: async () => {
+                try {
+                    loading.show();
+                    await api.post(`/api/task/enable.reminder/${task.id}`);
+                    flash.success('Tạo lời nhắc thành công');
+                    window.location.reload();
+                } catch (e) {
+                    console.error(e);
+                    flash.error('Tạo lời nhắc thất bại');
+                } finally {
+                    loading.hide();
+                }
+            },
+        });
+        items.push({
+            label: <div>Chỉnh sửa lời nhắc</div>,
+            key: 'edit.reminder',
+            disabled: !toBoolean(data?.enable_remind),
+            onClick: () => {
+                drawer.showForm({
+                    title: 'Chỉnh sửa lời nhắc',
+                    url: `/api/task/edit.reminder/${task.id}`,
+                    callback: () => {
+                        flash.success('Chỉnh sửa lời nhắc thành công!');
+                        window.location.reload();
+                    },
+                    submit: 'Cập nhật',
+                    content: (
+                        <TaskReminder
+                            value={{ duration: data?.duration || 0 }}
+                        />
+                    ),
+                });
+            },
+        });
+        items.push({
+            label: <div>Tắt lời nhắc</div>,
+            key: 'disable.reminder',
+            disabled: !toBoolean(data?.enable_remind),
+            onClick: async () => {
+                try {
+                    loading.show();
+                    await api.post(`/api/task/disable.reminder/${task.id}`);
+                    flash.success('Tắt lời nhắc thành công');
+                    window.location.reload();
+                } catch (e) {
+                    console.error(e);
+                    flash.error('Tắt lời nhắc thất bại');
+                } finally {
+                    loading.hide();
+                }
+            },
+        });
     }
 
     return {
         items: [
+            ...items,
             {
-                label: (
-                    <div
-                        onClick={() => {
-                            drawer.showForm({
-                                title: 'Cập nhật công việc',
-                                url: `/api/task/edit/${task.id}`,
-                                callback: () => {
-                                    flash.success('Cập nhật thành công!');
-                                    window.location.reload();
-                                },
-                                width: 718,
-                                submit: 'Cập nhật',
-                                content: (
-                                    <TaskDrawerForm
-                                        value={task}
-                                        account={account}
-                                    />
-                                ),
-                            });
-                        }}
-                    >
-                        Sửa
-                    </div>
-                ),
-                key: '1',
-                disable:
-                    !canEdit ||
-                    (task.status != TaskStatus.DRAFT &&
-                        task.status != TaskStatus.IN_PROGRESS),
-            },
-            {
-                label: (
-                    <div
-                        onClick={async () => {
-                            try {
-                                loading.show();
-                                const response = await api.post(
-                                    `/api/task/duplicate/${task.id}`
-                                );
-                                flash.success('Sao chép thành công!');
-                                window.location.reload();
-                            } catch (err) {
-                                flash.error('Sao chép thất bại!');
-                            } finally {
-                                loading.hide();
-                            }
-                        }}
-                    >
-                        Sao chép
-                    </div>
-                ),
-                key: '2',
-                disable: !canEdit,
-            },
-            set_start,
-            request_approval,
-            approve,
-            reject,
-            complete,
-            cancel,
-            {
-                label: (
-                    <div
-                        onClick={() => {
-                            confirm.show(
-                                'Are you sure you want to delete this task? This action can not be undone.',
-                                (choose) => {
-                                    if (choose) {
-                                        const deleteTask = async () => {
-                                            try {
-                                                loading.show();
-                                                await api.delete(
-                                                    `/api/task/delete/${task.id}`
-                                                );
-                                                flash.success(
-                                                    'Xóa thành công!'
-                                                );
-                                                window.location.reload();
-                                            } catch (err) {
-                                                console.error(err);
-                                                flash.error('Xóa thất bại!');
-                                            } finally {
-                                                loading.hide();
-                                            }
-                                        };
-                                        deleteTask();
+                label: <div>Xóa</div>,
+                onClick: () => {
+                    confirm.show(
+                        'Are you sure you want to delete this task? This action can not be undone.',
+                        (choose) => {
+                            if (choose) {
+                                const deleteTask = async () => {
+                                    try {
+                                        loading.show();
+                                        await api.delete(
+                                            `/api/task/delete/${task.id}`
+                                        );
+                                        flash.success('Xóa thành công!');
+                                        window.location.reload();
+                                    } catch (err) {
+                                        console.error(err);
+                                        flash.error('Xóa thất bại!');
+                                    } finally {
+                                        loading.hide();
                                     }
-                                }
-                            );
-                        }}
-                    >
-                        Xóa
-                    </div>
-                ),
-                key: '3',
-                disable: !canDelete,
+                                };
+                                deleteTask();
+                            }
+                        }
+                    );
+                },
+                key: 'delete',
+                disabled: !canDelete,
                 danger: true,
             },
         ],
@@ -326,6 +343,44 @@ const getColumns = (account, user) => {
             dataIndex: 'project',
         },
         {
+            title: 'Tiến trình',
+            width: 150,
+            fixed: 'left',
+            render: (e) => {
+                let process = Process.fromContext(e.process);
+                if (!process) {
+                    return <Tag>{'Không có dữ liệu'}</Tag>;
+                }
+
+                if (process.id != Process.DOING) {
+                    return <Tag color={process.color}>{process.label}</Tag>;
+                }
+
+                let percent = 0;
+
+                if (e.status == TaskStatus.IN_PROGRESS) {
+                    percent = 30;
+                } else if (e.status == TaskStatus.PENDING_APPROVAL) {
+                    percent = 60;
+                } else {
+                    percent = 90;
+                }
+
+                return <Progress percent={percent} type="line" />;
+            },
+        },
+        {
+            title: 'Trạng thái',
+            dataIndex: 'status',
+            width: 150,
+            fixed: 'left',
+            render: (e) => {
+                return e
+                    ? TaskStatus.fromContext(e)?.label
+                    : 'Không có dữ liệu';
+            },
+        },
+        {
             title: 'Ngày bắt đầu',
             dataIndex: 'start_date',
             render: (e) => {
@@ -337,15 +392,6 @@ const getColumns = (account, user) => {
             dataIndex: 'end_date',
             render: (e) => {
                 return e ? DateHelpers.formatDate(e, 'DD/MM/YYYY') : '';
-            },
-        },
-        {
-            title: 'Trạng thái',
-            dataIndex: 'status',
-            render: (e) => {
-                return e
-                    ? TaskStatus.fromContext(e)?.label
-                    : 'Không có dữ liệu';
             },
         },
         {
