@@ -29,6 +29,7 @@ import AuthContext from '../context/AuthContext';
 import Arr from '../utils/Array';
 import Process from '../utils/Process';
 import TaskReminder from '../components/task/TaskReminder';
+import ActionManager from '../utils/ActionManager';
 const renderEmpty = (component_name) => {
     if (component_name === 'Table.filter') {
         return (
@@ -65,8 +66,10 @@ const getActions = (task, user) => {
     const toBoolean = (input) => {
         if (input === undefined || input === null || input === '') return false;
         return input === 'true' || input === true;
-    }
-    let items = [
+    };
+
+    const am = ActionManager();
+    am.registerMultiple([
         {
             label: <div>Sửa</div>,
             onClick: () => {
@@ -83,17 +86,16 @@ const getActions = (task, user) => {
                 });
             },
             key: 'edit',
-            disabled:
-                !canEdit ||
-                (task.status != TaskStatus.DRAFT &&
-                    task.status != TaskStatus.IN_PROGRESS),
+            acl: canEdit &&
+                (task.status == TaskStatus.DRAFT ||
+                    task.status == TaskStatus.IN_PROGRESS),
         },
         {
             label: <div>Sao chép</div>,
             onClick: async () => {
                 try {
                     loading.show();
-                    const response = await api.post(
+                    await api.post(
                         `/api/task/duplicate/${task.id}`
                     );
                     flash.success('Sao chép thành công!');
@@ -105,9 +107,11 @@ const getActions = (task, user) => {
                 }
             },
             key: 'duplicate',
-            disabled: !canEdit,
+            acl: canEdit,
         },
-    ];
+    ]);
+
+    let items = [];
 
     if (acl.edit && task.status == TaskStatus.DRAFT) {
         items.push({
@@ -252,7 +256,7 @@ const getActions = (task, user) => {
                 } finally {
                     loading.hide();
                 }
-            }
+            },
         });
         items.push({
             label: <div>Chỉnh sửa lời nhắc</div>,
@@ -267,9 +271,13 @@ const getActions = (task, user) => {
                         window.location.reload();
                     },
                     submit: 'Cập nhật',
-                    content: <TaskReminder value={{duration: data?.duration || 0}} />,
+                    content: (
+                        <TaskReminder
+                            value={{ duration: data?.duration || 0 }}
+                        />
+                    ),
                 });
-            }
+            },
         });
         items.push({
             label: <div>Tắt lời nhắc</div>,
@@ -287,7 +295,7 @@ const getActions = (task, user) => {
                 } finally {
                     loading.hide();
                 }
-            }
+            },
         });
     }
 
