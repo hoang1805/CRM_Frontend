@@ -106,7 +106,7 @@ const Notification = (props) => {
 
     useEffect(() => {
         const newClient = new StompClient({
-            brokerURL: 'ws://titancrm.vn/ws/websocket',
+            brokerURL: 'wss://titancrm.vn/ws/websocket',
             onConnect: () => {
                 console.log('Connected to WebSocket');
                 newClient.subscribe(
